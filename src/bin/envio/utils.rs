@@ -2,56 +2,11 @@
 use std::path::Path;
 use std::{fs::File, io::Write, path::PathBuf};
 
-use envio::{
-    Env, EnvMap,
-    profile::{ProfileMetadata, SerializedProfile},
-};
+use envio::{Env, EnvMap};
 use indicatif::{ProgressBar, ProgressState, ProgressStyle};
 use reqwest::Client;
 
 use crate::error::{AppError, AppResult};
-
-pub fn get_configdir() -> PathBuf {
-    dirs::home_dir().unwrap().join(".envio")
-}
-
-pub fn get_profile_dir() -> PathBuf {
-    get_configdir().join("profiles")
-}
-
-#[cfg(target_family = "unix")]
-pub fn get_shellscript_path() -> PathBuf {
-    get_configdir().join("setenv.sh")
-}
-
-pub fn get_cwd() -> PathBuf {
-    std::env::current_dir().unwrap()
-}
-
-pub fn contains_path_separator(s: &str) -> bool {
-    s.contains('/') || s.contains('\\')
-}
-
-/// returns the path for a profile that does **not** exist yet
-pub fn build_profile_path(profile_name: &str) -> PathBuf {
-    get_profile_dir().join(format!("{}.env", profile_name))
-}
-
-/// returns the path for a profile that **must exist**
-pub fn get_profile_path(profile_name: &str) -> AppResult<PathBuf> {
-    let path = build_profile_path(profile_name);
-    if !path.exists() {
-        return Err(AppError::ProfileDoesNotExist(profile_name.to_string()));
-    }
-
-    Ok(path)
-}
-
-pub fn get_profile_metadata(profile_name: &str) -> AppResult<ProfileMetadata> {
-    let path = get_profile_path(profile_name)?;
-    let serialized_profile: SerializedProfile = envio::utils::get_serialized_profile(path)?;
-    Ok(serialized_profile.metadata)
-}
 
 pub fn parse_envs_from_string(buffer: &str) -> AppResult<EnvMap> {
     let mut envs_vec = EnvMap::default();
@@ -116,6 +71,14 @@ pub async fn download_file(url: &str, file_name: &str) -> AppResult<()> {
 
     pb.finish();
     Ok(())
+}
+
+pub fn get_cwd() -> PathBuf {
+    std::env::current_dir().expect("Failed to get current dir")
+}
+
+pub fn get_home_dir() -> PathBuf {
+    dirs::home_dir().expect("Failed to get home dir")
 }
 
 #[cfg(target_family = "unix")]

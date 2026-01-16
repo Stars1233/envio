@@ -31,6 +31,9 @@ _envio() {
             envio,import)
                 cmd="envio__import"
                 ;;
+            envio,init)
+                cmd="envio__init"
+                ;;
             envio,list)
                 cmd="envio__list"
                 ;;
@@ -74,7 +77,7 @@ _envio() {
 
     case "${cmd}" in
         envio)
-            opts="-h --diagnostic --help create new delete remove list ls show set unset load unload run import export tui completion version"
+            opts="-h --diagnostic --help init create new delete remove list ls show set unset load unload run import export tui completion version"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 1 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -102,7 +105,7 @@ _envio() {
             return 0
             ;;
         envio__create)
-            opts="-d -f -e -k -c -x -h --description --from-file --envs --cipher-kind --comments --expires --diagnostic --help <PROFILE_NAME>"
+            opts="-d -f -e -k -c -x -s -h --description --from-file --envs --cipher-kind --comments --expires --scope --diagnostic --help <PROFILE_NAME>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -140,6 +143,14 @@ _envio() {
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
+                --scope)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
+                -s)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
                 *)
                     COMPREPLY=()
                     ;;
@@ -148,12 +159,20 @@ _envio() {
             return 0
             ;;
         envio__delete)
-            opts="-h --diagnostic --help <PROFILE_NAME>"
+            opts="-s -h --scope --diagnostic --help <PROFILE_NAME>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
             fi
             case "${prev}" in
+                --scope)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
+                -s)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
                 *)
                     COMPREPLY=()
                     ;;
@@ -162,7 +181,7 @@ _envio() {
             return 0
             ;;
         envio__export)
-            opts="-o -k -h --output-file-path --keys --diagnostic --help <PROFILE_NAME>"
+            opts="-o -k -s -h --output-file-path --keys --scope --diagnostic --help <PROFILE_NAME>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -184,6 +203,14 @@ _envio() {
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
+                --scope)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
+                -s)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
                 *)
                     COMPREPLY=()
                     ;;
@@ -192,7 +219,7 @@ _envio() {
             return 0
             ;;
         envio__import)
-            opts="-n -h --profile-name --diagnostic --help <SOURCE>"
+            opts="-n -s -h --profile-name --scope --diagnostic --help <SOURCE>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
@@ -206,6 +233,28 @@ _envio() {
                     COMPREPLY=($(compgen -f "${cur}"))
                     return 0
                     ;;
+                --scope)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
+                -s)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
+                *)
+                    COMPREPLY=()
+                    ;;
+            esac
+            COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+            return 0
+            ;;
+        envio__init)
+            opts="-h --diagnostic --help"
+            if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
+                COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
+                return 0
+            fi
+            case "${prev}" in
                 *)
                     COMPREPLY=()
                     ;;
@@ -214,12 +263,20 @@ _envio() {
             return 0
             ;;
         envio__list)
-            opts="-h --no-pretty-print --diagnostic --help"
+            opts="-s -h --scope --no-pretty-print --diagnostic --help"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
             fi
             case "${prev}" in
+                --scope)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
+                -s)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
                 *)
                     COMPREPLY=()
                     ;;
@@ -228,12 +285,20 @@ _envio() {
             return 0
             ;;
         envio__load)
-            opts="-h --diagnostic --help <PROFILE_NAME>"
+            opts="-s -h --scope --diagnostic --help <PROFILE_NAME>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
             fi
             case "${prev}" in
+                --scope)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
+                -s)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
                 *)
                     COMPREPLY=()
                     ;;
@@ -242,12 +307,20 @@ _envio() {
             return 0
             ;;
         envio__run)
-            opts="-h --diagnostic --help <PROFILE_NAME> <COMMAND>..."
+            opts="-s -h --scope --diagnostic --help <PROFILE_NAME> <COMMAND>..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
             fi
             case "${prev}" in
+                --scope)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
+                -s)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
                 *)
                     COMPREPLY=()
                     ;;
@@ -256,12 +329,20 @@ _envio() {
             return 0
             ;;
         envio__set)
-            opts="-c -x -h --comments --expires --diagnostic --help <PROFILE_NAME> <ENVS>..."
+            opts="-c -x -s -h --comments --expires --scope --diagnostic --help <PROFILE_NAME> <ENVS>..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
             fi
             case "${prev}" in
+                --scope)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
+                -s)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
                 *)
                     COMPREPLY=()
                     ;;
@@ -270,12 +351,20 @@ _envio() {
             return 0
             ;;
         envio__show)
-            opts="-c -x -h --show-comments --show-expiration --no-pretty-print --diagnostic --help <PROFILE_NAME>"
+            opts="-c -x -s -h --show-comments --show-expiration --scope --no-pretty-print --diagnostic --help <PROFILE_NAME>"
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
             fi
             case "${prev}" in
+                --scope)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
+                -s)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
                 *)
                     COMPREPLY=()
                     ;;
@@ -312,12 +401,20 @@ _envio() {
             return 0
             ;;
         envio__unset)
-            opts="-h --diagnostic --help <PROFILE_NAME> <KEYS>..."
+            opts="-s -h --scope --diagnostic --help <PROFILE_NAME> <KEYS>..."
             if [[ ${cur} == -* || ${COMP_CWORD} -eq 2 ]] ; then
                 COMPREPLY=( $(compgen -W "${opts}" -- "${cur}") )
                 return 0
             fi
             case "${prev}" in
+                --scope)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
+                -s)
+                    COMPREPLY=($(compgen -W "local global" -- "${cur}"))
+                    return 0
+                    ;;
                 *)
                     COMPREPLY=()
                     ;;

@@ -1,5 +1,7 @@
 use clap::Parser;
 
+use crate::config::ConfigScope;
+
 #[derive(Parser, Debug)]
 #[clap(disable_help_subcommand = true)]
 pub struct ClapApp {
@@ -15,6 +17,12 @@ pub struct ClapApp {
 
 #[derive(clap::Subcommand, Debug)]
 pub enum Command {
+    #[command(
+        name = "init",
+        about = "Initialize envio to be used in the current project directory",
+        override_usage = "envio init"
+    )]
+    Init,
     #[command(
         name = "create",
         about = "Create a new profile",
@@ -57,17 +65,21 @@ pub enum Command {
             help = "add expiration dates to the provided environment variables"
         )]
         expires: bool,
+        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
+        scope: Option<ConfigScope>,
     },
 
     #[command(
         name = "delete",
         about = "Delete a profile",
         visible_aliases = &["remove"],
-        override_usage = "envio delete <PROFILE_NAME>"
+        override_usage = "envio delete <PROFILE_NAME> [OPTIONS]"
     )]
     Delete {
         #[arg(required = true, help = "name of the profile")]
         profile_name: String,
+        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
+        scope: Option<ConfigScope>,
     },
 
     #[command(
@@ -79,6 +91,8 @@ pub enum Command {
     List {
         #[arg(long = "no-pretty-print", help = "disable pretty printing")]
         no_pretty_print: bool,
+        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
+        scope: Option<ConfigScope>,
     },
 
     #[command(
@@ -99,6 +113,8 @@ pub enum Command {
         show_expiration: bool,
         #[arg(long = "no-pretty-print", help = "disable pretty printing")]
         no_pretty_print: bool,
+        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
+        scope: Option<ConfigScope>,
     },
 
     #[command(
@@ -123,6 +139,8 @@ pub enum Command {
             help = "add expiration dates to the provided environment variables"
         )]
         expires: bool,
+        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
+        scope: Option<ConfigScope>,
     },
 
     #[command(
@@ -135,16 +153,20 @@ pub enum Command {
         profile_name: String,
         #[arg(required = true, value_delimiter = ' ', num_args = 1.., help = "keys of environment variables to remove")]
         keys: Vec<String>,
+        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
+        scope: Option<ConfigScope>,
     },
 
     #[command(
         name = "load",
         about = "Load environment variables from a profile for use in terminal sessions",
-        override_usage = "envio load <PROFILE_NAME>"
+        override_usage = "envio load <PROFILE_NAME> [OPTIONS]"
     )]
     Load {
         #[arg(required = true, help = "name of the profile")]
         profile_name: String,
+        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
+        scope: Option<ConfigScope>,
     },
 
     #[cfg(target_family = "unix")]
@@ -159,21 +181,25 @@ pub enum Command {
     #[command(
         name = "unload",
         about = "Unload previously loaded environment variables from terminal sessions",
-        override_usage = "envio unload <PROFILE_NAME>"
+        override_usage = "envio unload <PROFILE_NAME> [OPTIONS]"
     )]
     Unload {
         #[arg(required = true, help = "name of the profile")]
         profile_name: String,
+        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
+        scope: Option<ConfigScope>,
     },
 
     #[command(
         name = "run",
         about = "Run a command using environment variables from a profile",
-        override_usage = "envio run <PROFILE_NAME> -- <COMMAND>"
+        override_usage = "envio run <PROFILE_NAME> [OPTIONS] -- <COMMAND>"
     )]
     Run {
         #[arg(required = true, help = "name of the profile")]
         profile_name: String,
+        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
+        scope: Option<ConfigScope>,
         #[arg(last = true, required = true, help = "command to run")]
         command: Vec<String>,
     },
@@ -192,6 +218,8 @@ pub enum Command {
             help = "name for the imported profile"
         )]
         profile_name: Option<String>,
+        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
+        scope: Option<ConfigScope>,
     },
 
     #[command(
@@ -216,6 +244,8 @@ pub enum Command {
             help = "comma-separated list of keys to export (type 'select' to choose interactively)"
         )]
         keys: Option<Vec<String>>,
+        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
+        scope: Option<ConfigScope>,
     },
 
     #[command(

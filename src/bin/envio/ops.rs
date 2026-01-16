@@ -11,14 +11,15 @@ use comfy_table::{Attribute, Cell, ContentArrangement, Table};
 use envio::{EnvMap, Profile, cipher::Cipher};
 
 #[cfg(target_family = "unix")]
-use crate::utils::get_shellscript_path;
+use crate::config::get_shellscript_path;
 
 use crate::{
-    error::{AppError, AppResult},
-    utils::{
-        build_profile_path, contains_path_separator, download_file, get_cwd, get_profile_dir,
-        get_profile_metadata, get_profile_path,
+    config::{
+        ConfigScope, build_profile_path, contains_path_separator, get_profile_dir,
+        get_profile_metadata, get_profile_path, profile_dir_for,
     },
+    error::{AppError, AppResult},
+    utils::{download_file, get_cwd},
     warning_msg,
 };
 
@@ -27,8 +28,9 @@ pub fn create_profile(
     description: Option<String>,
     envs: EnvMap,
     cipher: Box<dyn Cipher>,
+    scope: Option<ConfigScope>,
 ) -> AppResult<()> {
-    let profile_file_path = build_profile_path(&name);
+    let profile_file_path = build_profile_path(&name, scope);
 
     if profile_file_path.exists() {
         return Err(AppError::ProfileExists(name));
@@ -131,32 +133,37 @@ pub fn list_envs(profile: &Profile, show_comments: bool, show_expiration: bool) 
     println!("{table}");
 }
 
-pub fn delete_profile(profile_name: &str) -> AppResult<()> {
-    std::fs::remove_file(get_profile_path(profile_name)?)?;
+pub fn delete_profile(profile_name: &str, scope: Option<ConfigScope>) -> AppResult<()> {
+    std::fs::remove_file(get_profile_path(profile_name, scope)?)?;
 
     Ok(())
 }
 
-pub fn list_profiles(no_pretty_print: bool) -> AppResult<()> {
-    let profile_dir = get_profile_dir();
+pub fn list_profiles(no_pretty_print: bool, scope: Option<ConfigScope>) -> AppResult<()> {
+    let profile_dir = match scope {
+        Some(s) => profile_dir_for(s),
+        None => get_profile_dir(),
+    };
 
     let mut profiles = Vec::new();
-    for entry in std::fs::read_dir(profile_dir).unwrap() {
-        let entry = entry.unwrap();
-        let path = entry.path();
-        match path.extension() {
-            None => continue,
-            Some(ext) => {
-                if ext != "env" {
-                    continue;
+    if profile_dir.exists() {
+        for entry in std::fs::read_dir(&profile_dir).unwrap() {
+            let entry = entry.unwrap();
+            let path = entry.path();
+            match path.extension() {
+                None => continue,
+                Some(ext) => {
+                    if ext != "env" {
+                        continue;
+                    }
                 }
             }
+            let profile_name = path.file_stem().unwrap().to_str().unwrap().to_owned();
+            if profile_name.starts_with('.') {
+                continue;
+            }
+            profiles.push(profile_name);
         }
-        let profile_name = path.file_stem().unwrap().to_str().unwrap().to_owned();
-        if profile_name.starts_with('.') {
-            continue;
-        }
-        profiles.push(profile_name);
     }
 
     if no_pretty_print {
@@ -165,11 +172,11 @@ pub fn list_profiles(no_pretty_print: bool) -> AppResult<()> {
             return Ok(());
         }
 
-        for profile in profiles {
+        for profile in &profiles {
             println!(
                 "{} - {}",
                 profile,
-                get_profile_metadata(&profile)?
+                get_profile_metadata(profile, scope)?
                     .description
                     .unwrap_or("".to_string())
             );
@@ -188,10 +195,10 @@ pub fn list_profiles(no_pretty_print: bool) -> AppResult<()> {
         Cell::new("Updated At").add_attribute(Attribute::Bold),
     ]);
 
-    for profile in profiles {
-        let metadata = get_profile_metadata(&profile)?;
+    for profile in &profiles {
+        let metadata = get_profile_metadata(profile, scope)?;
         table.add_row(vec![
-            &profile,
+            profile,
             &metadata.description.unwrap_or("".to_string()),
             metadata.cipher_kind.as_ref(),
             &metadata.created_at.format("%Y-%m-%d %H:%M:%S").to_string(),
@@ -203,8 +210,12 @@ pub fn list_profiles(no_pretty_print: bool) -> AppResult<()> {
     Ok(())
 }
 
-pub fn download_profile(url: String, profile_name: &str) -> AppResult<()> {
-    let location = build_profile_path(profile_name);
+pub fn download_profile(
+    url: String,
+    profile_name: &str,
+    scope: Option<ConfigScope>,
+) -> AppResult<()> {
+    let location = build_profile_path(profile_name, scope);
 
     if location.exists() {
         return Err(AppError::ProfileExists(profile_name.to_owned()));
@@ -219,7 +230,11 @@ pub fn download_profile(url: String, profile_name: &str) -> AppResult<()> {
     Ok(())
 }
 
-pub fn import_profile(file_path: String, profile_name: &str) -> AppResult<()> {
+pub fn import_profile(
+    file_path: String,
+    profile_name: &str,
+    scope: Option<ConfigScope>,
+) -> AppResult<()> {
     if !Path::new(&file_path).exists() {
         return Err(AppError::Msg(format!(
             "File `{}` does not exist",
@@ -235,7 +250,7 @@ pub fn import_profile(file_path: String, profile_name: &str) -> AppResult<()> {
     let mut contents = String::new();
     file.read_to_string(&mut contents).unwrap();
 
-    let location = build_profile_path(profile_name);
+    let location = build_profile_path(profile_name, scope);
 
     if location.exists() {
         return Err(AppError::ProfileExists(profile_name.to_owned()));
@@ -247,7 +262,7 @@ pub fn import_profile(file_path: String, profile_name: &str) -> AppResult<()> {
 }
 
 #[cfg(target_family = "unix")]
-pub fn create_shellscript(profile: &str) -> AppResult<()> {
+pub fn load_profile(profile_path: &Path) -> AppResult<()> {
     let mut file = std::fs::OpenOptions::new()
         .write(true)
         .open(get_shellscript_path())?;
@@ -265,33 +280,24 @@ pub fn create_shellscript(profile: &str) -> AppResult<()> {
 raw_output=$(envio show {p} --no-pretty-print)
 
 if ! echo "$raw_output" | grep -q "="; then
-    echo -e "\e[31mError: \e[0mFailed to load environment variables from profile '{p}'" >&2
-    return 1 2>/dev/null || exit 1
+echo -e "\e[31mError: \e[0mFailed to load environment variables from profile '{p}'" >&2
+return 1 2>/dev/null || exit 1
 fi
 
 ENV_VARS=$(echo "$raw_output" | awk -F "=" '/^[^=]+=.+/ {{print}}')
 
 while IFS= read -r line; do
-    var="${{line%%=*}}"
-    val="${{line#*=}}"
-    export "$var"="$val"
+var="${{line%%=*}}"
+val="${{line#*=}}"
+export "$var"="$val"
 done <<< "$ENV_VARS"
 "#,
-        p = profile,
+        p = profile_path.display(),
     );
 
     file.write_all(shellscript.as_bytes())?;
     file.flush()?;
     file.sync_all()?;
-
-    Ok(())
-}
-
-#[cfg(target_family = "unix")]
-pub fn load_profile(profile_name: &str) -> AppResult<()> {
-    get_profile_path(profile_name)?; // will error if the profile does not exist
-
-    create_shellscript(profile_name)?;
 
     Ok(())
 }

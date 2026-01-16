@@ -10,8 +10,8 @@ use ratatui::{
 
 use super::{Action, Screen, ScreenId};
 use crate::{
+    config::{get_profile_dir, get_profile_metadata},
     error::AppResult,
-    utils::{get_profile_dir, get_profile_metadata},
 };
 
 fn styled_span(content: impl Into<String>, fg: Color, bold: bool) -> Span<'static> {
@@ -157,7 +157,7 @@ impl SelectScreen {
                 _ => continue,
             };
 
-            let metadata = get_profile_metadata(&profile_name)?;
+            let metadata = get_profile_metadata(&profile_name, None)?;
 
             self.profiles.push(ProfileInfo {
                 name: profile_name,
@@ -429,7 +429,7 @@ impl SelectScreen {
         match key.code {
             KeyCode::Char('y') | KeyCode::Char('Y') => {
                 self.delete_confirmation = None;
-                crate::ops::delete_profile(&profile_name)?;
+                crate::ops::delete_profile(&profile_name, None)?;
                 self.load_profiles()?;
                 self.update_filter();
                 if !self.filtered_profiles.is_empty() {

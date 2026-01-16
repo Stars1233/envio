@@ -24,6 +24,7 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
             [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('init', 'init', [CompletionResultType]::ParameterValue, 'Initialize envio to be used in the current project directory')
             [CompletionResult]::new('create', 'create', [CompletionResultType]::ParameterValue, 'Create a new profile')
             [CompletionResult]::new('new', 'new', [CompletionResultType]::ParameterValue, 'Create a new profile')
             [CompletionResult]::new('delete', 'delete', [CompletionResultType]::ParameterValue, 'Delete a profile')
@@ -43,6 +44,12 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
             [CompletionResult]::new('version', 'version', [CompletionResultType]::ParameterValue, 'Print version information')
             break
         }
+        'envio;init' {
+            [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
+            [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
+            [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
+            break
+        }
         'envio;create' {
             [CompletionResult]::new('-d', '-d', [CompletionResultType]::ParameterName, 'optional note or description of the profile')
             [CompletionResult]::new('--description', '--description', [CompletionResultType]::ParameterName, 'optional note or description of the profile')
@@ -52,6 +59,8 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
             [CompletionResult]::new('--envs', '--envs', [CompletionResultType]::ParameterName, 'environment variables to add (format: KEY=VALUE or only provide KEY and the value will be prompted for)')
             [CompletionResult]::new('-k', '-k', [CompletionResultType]::ParameterName, 'encryption cipher to use')
             [CompletionResult]::new('--cipher-kind', '--cipher-kind', [CompletionResultType]::ParameterName, 'encryption cipher to use')
+            [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
+            [CompletionResult]::new('--scope', '--scope', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
             [CompletionResult]::new('-c', '-c', [CompletionResultType]::ParameterName, 'add comments to the provided environment variables')
             [CompletionResult]::new('--comments', '--comments', [CompletionResultType]::ParameterName, 'add comments to the provided environment variables')
             [CompletionResult]::new('-x', '-x', [CompletionResultType]::ParameterName, 'add expiration dates to the provided environment variables')
@@ -70,6 +79,8 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
             [CompletionResult]::new('--envs', '--envs', [CompletionResultType]::ParameterName, 'environment variables to add (format: KEY=VALUE or only provide KEY and the value will be prompted for)')
             [CompletionResult]::new('-k', '-k', [CompletionResultType]::ParameterName, 'encryption cipher to use')
             [CompletionResult]::new('--cipher-kind', '--cipher-kind', [CompletionResultType]::ParameterName, 'encryption cipher to use')
+            [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
+            [CompletionResult]::new('--scope', '--scope', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
             [CompletionResult]::new('-c', '-c', [CompletionResultType]::ParameterName, 'add comments to the provided environment variables')
             [CompletionResult]::new('--comments', '--comments', [CompletionResultType]::ParameterName, 'add comments to the provided environment variables')
             [CompletionResult]::new('-x', '-x', [CompletionResultType]::ParameterName, 'add expiration dates to the provided environment variables')
@@ -80,18 +91,24 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
             break
         }
         'envio;delete' {
+            [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
+            [CompletionResult]::new('--scope', '--scope', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
             [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'envio;remove' {
+            [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
+            [CompletionResult]::new('--scope', '--scope', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
             [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'envio;list' {
+            [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
+            [CompletionResult]::new('--scope', '--scope', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
             [CompletionResult]::new('--no-pretty-print', '--no-pretty-print', [CompletionResultType]::ParameterName, 'disable pretty printing')
             [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
@@ -99,6 +116,8 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
             break
         }
         'envio;ls' {
+            [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
+            [CompletionResult]::new('--scope', '--scope', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
             [CompletionResult]::new('--no-pretty-print', '--no-pretty-print', [CompletionResultType]::ParameterName, 'disable pretty printing')
             [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
@@ -106,6 +125,8 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
             break
         }
         'envio;show' {
+            [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
+            [CompletionResult]::new('--scope', '--scope', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
             [CompletionResult]::new('-c', '-c', [CompletionResultType]::ParameterName, 'display comments')
             [CompletionResult]::new('--show-comments', '--show-comments', [CompletionResultType]::ParameterName, 'display comments')
             [CompletionResult]::new('-x', '-x', [CompletionResultType]::ParameterName, 'display expiration dates')
@@ -117,6 +138,8 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
             break
         }
         'envio;set' {
+            [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
+            [CompletionResult]::new('--scope', '--scope', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
             [CompletionResult]::new('-c', '-c', [CompletionResultType]::ParameterName, 'add comments to the provided environment variables')
             [CompletionResult]::new('--comments', '--comments', [CompletionResultType]::ParameterName, 'add comments to the provided environment variables')
             [CompletionResult]::new('-x', '-x', [CompletionResultType]::ParameterName, 'add expiration dates to the provided environment variables')
@@ -127,24 +150,32 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
             break
         }
         'envio;unset' {
+            [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
+            [CompletionResult]::new('--scope', '--scope', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
             [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'envio;load' {
+            [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
+            [CompletionResult]::new('--scope', '--scope', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
             [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'envio;unload' {
+            [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
+            [CompletionResult]::new('--scope', '--scope', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
             [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
             break
         }
         'envio;run' {
+            [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
+            [CompletionResult]::new('--scope', '--scope', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
             [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
@@ -153,6 +184,8 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
         'envio;import' {
             [CompletionResult]::new('-n', '-n', [CompletionResultType]::ParameterName, 'name for the imported profile')
             [CompletionResult]::new('--profile-name', '--profile-name', [CompletionResultType]::ParameterName, 'name for the imported profile')
+            [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
+            [CompletionResult]::new('--scope', '--scope', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
             [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')
@@ -163,6 +196,8 @@ Register-ArgumentCompleter -Native -CommandName 'envio' -ScriptBlock {
             [CompletionResult]::new('--output-file-path', '--output-file-path', [CompletionResultType]::ParameterName, 'output file path (default: .env)')
             [CompletionResult]::new('-k', '-k', [CompletionResultType]::ParameterName, 'comma-separated list of keys to export (type ''select'' to choose interactively)')
             [CompletionResult]::new('--keys', '--keys', [CompletionResultType]::ParameterName, 'comma-separated list of keys to export (type ''select'' to choose interactively)')
+            [CompletionResult]::new('-s', '-s', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
+            [CompletionResult]::new('--scope', '--scope', [CompletionResultType]::ParameterName, 'scope to use (local, global)')
             [CompletionResult]::new('--diagnostic', '--diagnostic', [CompletionResultType]::ParameterName, 'Show diagnostic information for bug reports')
             [CompletionResult]::new('-h', '-h', [CompletionResultType]::ParameterName, 'Print help')
             [CompletionResult]::new('--help', '--help', [CompletionResultType]::ParameterName, 'Print help')

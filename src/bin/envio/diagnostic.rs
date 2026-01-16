@@ -1,7 +1,7 @@
 pub use git_version::git_version;
 
+use crate::config::{get_config_dir, get_profile_dir};
 use crate::error::AppResult;
-use crate::utils::{get_configdir, get_profile_dir};
 
 struct Code {
     language: Option<String>,
@@ -157,7 +157,7 @@ fn format_entry(entry: &DiagnosticEntry) -> String {
 fn get_config_info() -> Vec<DiagnosticEntry> {
     let mut info = vec![];
 
-    let configdir = get_configdir();
+    let configdir = get_config_dir();
     info.push(DiagnosticEntry::Text(format!(
         "Config directory: {} ({})",
         configdir.display(),

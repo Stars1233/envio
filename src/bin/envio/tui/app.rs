@@ -15,8 +15,8 @@ use super::{
     screens::{Action, Screen, ScreenEvent, ScreenId, SelectScreen},
 };
 use crate::{
+    config::{get_profile_metadata, get_profile_path},
     error::AppResult,
-    utils::{get_profile_metadata, get_profile_path},
 };
 
 pub struct TuiApp {
@@ -129,7 +129,7 @@ impl TuiApp {
     }
 
     fn open_profile(&mut self, name: &str) -> AppResult<()> {
-        let metadata = get_profile_metadata(name)?;
+        let metadata = get_profile_metadata(name, None)?;
 
         match metadata.cipher_kind {
             envio::cipher::CipherKind::PASSPHRASE | envio::cipher::CipherKind::AGE => {
@@ -147,7 +147,7 @@ impl TuiApp {
     }
 
     fn open_unencrypted_profile(&mut self, name: &str) -> AppResult<()> {
-        let path = get_profile_path(name)?;
+        let path = get_profile_path(name, None)?;
         let profile = envio::get_profile(path, None::<fn() -> Zeroizing<String>>)?;
 
         self.ctx.cache.insert_profile(name.to_string(), profile);

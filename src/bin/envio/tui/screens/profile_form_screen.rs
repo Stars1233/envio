@@ -16,9 +16,9 @@ use zeroize::Zeroizing;
 
 use super::{Action, Screen, ScreenEvent, ScreenId};
 use crate::{
+    config::{build_profile_path, get_profile_metadata, get_profile_path},
     error::AppResult,
     ops,
-    utils::{build_profile_path, get_profile_metadata, get_profile_path},
 };
 
 enum Status {
@@ -544,6 +544,7 @@ impl CreateProfileScreen {
                 Some(description),
                 EnvMap::default(),
                 create_cipher(cipher_kind, key)?,
+                None,
             )?;
 
             Ok(())
@@ -899,7 +900,7 @@ impl Screen for EditProfileScreen {
 
 impl EditProfileScreen {
     pub fn new(profile_name: String) -> AppResult<Self> {
-        let metadata = get_profile_metadata(&profile_name)?;
+        let metadata = get_profile_metadata(&profile_name, None)?;
         Ok(Self {
             profile_name,
             name: metadata.name.clone(),
@@ -942,8 +943,8 @@ impl EditProfileScreen {
             Some(self.description.trim().to_string())
         };
 
-        let new_file_path = build_profile_path(&new_profile_name);
-        let old_file_path = get_profile_path(&self.profile_name)?;
+        let new_file_path = build_profile_path(&new_profile_name, None);
+        let old_file_path = get_profile_path(&self.profile_name, None)?;
 
         let mut serialized_profile = envio::utils::get_serialized_profile(&old_file_path)?;
 

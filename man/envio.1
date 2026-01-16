@@ -2,10 +2,13 @@
 .el .ds Aq '
 .TH envio 1  "envio " 
 .SH NAME
-envio
+envio \- A modern and secure CLI tool for managing environment variables
 .SH SYNOPSIS
 \fBenvio\fR [\fB\-\-diagnostic\fR] [\fB\-h\fR|\fB\-\-help\fR] <\fIsubcommands\fR>
 .SH DESCRIPTION
+envio is a modern and secure CLI tool for managing environment variables.
+It provides encrypted storage for sensitive environment variables and supports
+both local (project-specific) and global scopes.
 .SH OPTIONS
 .TP
 \fB\-\-diagnostic\fR
@@ -15,44 +18,56 @@ Show diagnostic information for bug reports
 Print help
 .SH SUBCOMMANDS
 .TP
-envio\-create(1)
-Create a new profile
+\fBenvio\-init\fR(1)
+Initialize envio to be used in the current project directory
 .TP
-envio\-delete(1)
-Delete a profile
+\fBenvio\-create\fR(1)
+Create a new profile (alias: \fBnew\fR)
 .TP
-envio\-list(1)
-List all profiles
+\fBenvio\-delete\fR(1)
+Delete a profile (alias: \fBremove\fR)
 .TP
-envio\-show(1)
+\fBenvio\-list\fR(1)
+List all profiles (alias: \fBls\fR)
+.TP
+\fBenvio\-show\fR(1)
 Show environment variables in a profile
 .TP
-envio\-set(1)
+\fBenvio\-set\fR(1)
 Set or update environment variables in a profile
 .TP
-envio\-unset(1)
+\fBenvio\-unset\fR(1)
 Remove environment variables from a profile
 .TP
-envio\-load(1)
+\fBenvio\-load\fR(1)
 Load environment variables from a profile for use in terminal sessions
 .TP
-envio\-unload(1)
+\fBenvio\-unload\fR(1)
 Unload previously loaded environment variables from terminal sessions
 .TP
-envio\-run(1)
+\fBenvio\-run\fR(1)
 Run a command using environment variables from a profile
 .TP
-envio\-import(1)
+\fBenvio\-import\fR(1)
 Import a profile from a file or url
 .TP
-envio\-export(1)
+\fBenvio\-export\fR(1)
 Export the environment variables of a profile to a file
 .TP
-envio\-tui(1)
+\fBenvio\-tui\fR(1)
 Launch the interactive TUI application
 .TP
-envio\-completion(1)
-Show shell completion for the provided shell
+\fBenvio\-completion\fR(1)
+Show shell completion for the provided shell (bash, zsh, fish, powershell)
 .TP
-envio\-version(1)
+\fBenvio\-version\fR(1)
 Print version information
+.SH COMMON OPTIONS
+Most subcommands that operate on profiles support the following option:
+.TP
+\fB\-s\fR, \fB\-\-scope\fR <SCOPE>
+Scope to use (local, global). Local scope stores profiles in the current
+project directory, while global scope stores profiles in the user's home
+directory.
+.SH SEE ALSO
+Full documentation is available at https://github.com/envio\-cli/envio

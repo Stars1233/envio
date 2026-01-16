@@ -26,6 +26,7 @@ end
 
 complete -c envio -n "__fish_envio_needs_command" -l diagnostic -d 'Show diagnostic information for bug reports'
 complete -c envio -n "__fish_envio_needs_command" -s h -l help -d 'Print help'
+complete -c envio -n "__fish_envio_needs_command" -f -a "init" -d 'Initialize envio to be used in the current project directory'
 complete -c envio -n "__fish_envio_needs_command" -f -a "create" -d 'Create a new profile'
 complete -c envio -n "__fish_envio_needs_command" -f -a "new" -d 'Create a new profile'
 complete -c envio -n "__fish_envio_needs_command" -f -a "delete" -d 'Delete a profile'
@@ -43,10 +44,14 @@ complete -c envio -n "__fish_envio_needs_command" -f -a "export" -d 'Export the 
 complete -c envio -n "__fish_envio_needs_command" -f -a "tui" -d 'Launch the interactive TUI application'
 complete -c envio -n "__fish_envio_needs_command" -f -a "completion" -d 'Show shell completion for the provided shell'
 complete -c envio -n "__fish_envio_needs_command" -f -a "version" -d 'Print version information'
+complete -c envio -n "__fish_envio_using_subcommand init" -l diagnostic -d 'Show diagnostic information for bug reports'
+complete -c envio -n "__fish_envio_using_subcommand init" -s h -l help -d 'Print help'
 complete -c envio -n "__fish_envio_using_subcommand create" -s d -l description -d 'optional note or description of the profile' -r
 complete -c envio -n "__fish_envio_using_subcommand create" -s f -l from-file -d 'file path to load environment variables from' -r
 complete -c envio -n "__fish_envio_using_subcommand create" -s e -l envs -d 'environment variables to add (format: KEY=VALUE or only provide KEY and the value will be prompted for)' -r
 complete -c envio -n "__fish_envio_using_subcommand create" -s k -l cipher-kind -d 'encryption cipher to use' -r
+complete -c envio -n "__fish_envio_using_subcommand create" -s s -l scope -d 'scope to use (local, global)' -r -f -a "local\t''
+global\t''"
 complete -c envio -n "__fish_envio_using_subcommand create" -s c -l comments -d 'add comments to the provided environment variables'
 complete -c envio -n "__fish_envio_using_subcommand create" -s x -l expires -d 'add expiration dates to the provided environment variables'
 complete -c envio -n "__fish_envio_using_subcommand create" -l diagnostic -d 'Show diagnostic information for bug reports'
@@ -55,42 +60,66 @@ complete -c envio -n "__fish_envio_using_subcommand new" -s d -l description -d 
 complete -c envio -n "__fish_envio_using_subcommand new" -s f -l from-file -d 'file path to load environment variables from' -r
 complete -c envio -n "__fish_envio_using_subcommand new" -s e -l envs -d 'environment variables to add (format: KEY=VALUE or only provide KEY and the value will be prompted for)' -r
 complete -c envio -n "__fish_envio_using_subcommand new" -s k -l cipher-kind -d 'encryption cipher to use' -r
+complete -c envio -n "__fish_envio_using_subcommand new" -s s -l scope -d 'scope to use (local, global)' -r -f -a "local\t''
+global\t''"
 complete -c envio -n "__fish_envio_using_subcommand new" -s c -l comments -d 'add comments to the provided environment variables'
 complete -c envio -n "__fish_envio_using_subcommand new" -s x -l expires -d 'add expiration dates to the provided environment variables'
 complete -c envio -n "__fish_envio_using_subcommand new" -l diagnostic -d 'Show diagnostic information for bug reports'
 complete -c envio -n "__fish_envio_using_subcommand new" -s h -l help -d 'Print help'
+complete -c envio -n "__fish_envio_using_subcommand delete" -s s -l scope -d 'scope to use (local, global)' -r -f -a "local\t''
+global\t''"
 complete -c envio -n "__fish_envio_using_subcommand delete" -l diagnostic -d 'Show diagnostic information for bug reports'
 complete -c envio -n "__fish_envio_using_subcommand delete" -s h -l help -d 'Print help'
+complete -c envio -n "__fish_envio_using_subcommand remove" -s s -l scope -d 'scope to use (local, global)' -r -f -a "local\t''
+global\t''"
 complete -c envio -n "__fish_envio_using_subcommand remove" -l diagnostic -d 'Show diagnostic information for bug reports'
 complete -c envio -n "__fish_envio_using_subcommand remove" -s h -l help -d 'Print help'
+complete -c envio -n "__fish_envio_using_subcommand list" -s s -l scope -d 'scope to use (local, global)' -r -f -a "local\t''
+global\t''"
 complete -c envio -n "__fish_envio_using_subcommand list" -l no-pretty-print -d 'disable pretty printing'
 complete -c envio -n "__fish_envio_using_subcommand list" -l diagnostic -d 'Show diagnostic information for bug reports'
 complete -c envio -n "__fish_envio_using_subcommand list" -s h -l help -d 'Print help'
+complete -c envio -n "__fish_envio_using_subcommand ls" -s s -l scope -d 'scope to use (local, global)' -r -f -a "local\t''
+global\t''"
 complete -c envio -n "__fish_envio_using_subcommand ls" -l no-pretty-print -d 'disable pretty printing'
 complete -c envio -n "__fish_envio_using_subcommand ls" -l diagnostic -d 'Show diagnostic information for bug reports'
 complete -c envio -n "__fish_envio_using_subcommand ls" -s h -l help -d 'Print help'
+complete -c envio -n "__fish_envio_using_subcommand show" -s s -l scope -d 'scope to use (local, global)' -r -f -a "local\t''
+global\t''"
 complete -c envio -n "__fish_envio_using_subcommand show" -s c -l show-comments -d 'display comments'
 complete -c envio -n "__fish_envio_using_subcommand show" -s x -l show-expiration -d 'display expiration dates'
 complete -c envio -n "__fish_envio_using_subcommand show" -l no-pretty-print -d 'disable pretty printing'
 complete -c envio -n "__fish_envio_using_subcommand show" -l diagnostic -d 'Show diagnostic information for bug reports'
 complete -c envio -n "__fish_envio_using_subcommand show" -s h -l help -d 'Print help'
+complete -c envio -n "__fish_envio_using_subcommand set" -s s -l scope -d 'scope to use (local, global)' -r -f -a "local\t''
+global\t''"
 complete -c envio -n "__fish_envio_using_subcommand set" -s c -l comments -d 'add comments to the provided environment variables'
 complete -c envio -n "__fish_envio_using_subcommand set" -s x -l expires -d 'add expiration dates to the provided environment variables'
 complete -c envio -n "__fish_envio_using_subcommand set" -l diagnostic -d 'Show diagnostic information for bug reports'
 complete -c envio -n "__fish_envio_using_subcommand set" -s h -l help -d 'Print help'
+complete -c envio -n "__fish_envio_using_subcommand unset" -s s -l scope -d 'scope to use (local, global)' -r -f -a "local\t''
+global\t''"
 complete -c envio -n "__fish_envio_using_subcommand unset" -l diagnostic -d 'Show diagnostic information for bug reports'
 complete -c envio -n "__fish_envio_using_subcommand unset" -s h -l help -d 'Print help'
+complete -c envio -n "__fish_envio_using_subcommand load" -s s -l scope -d 'scope to use (local, global)' -r -f -a "local\t''
+global\t''"
 complete -c envio -n "__fish_envio_using_subcommand load" -l diagnostic -d 'Show diagnostic information for bug reports'
 complete -c envio -n "__fish_envio_using_subcommand load" -s h -l help -d 'Print help'
 complete -c envio -n "__fish_envio_using_subcommand unload" -l diagnostic -d 'Show diagnostic information for bug reports'
 complete -c envio -n "__fish_envio_using_subcommand unload" -s h -l help -d 'Print help'
+complete -c envio -n "__fish_envio_using_subcommand run" -s s -l scope -d 'scope to use (local, global)' -r -f -a "local\t''
+global\t''"
 complete -c envio -n "__fish_envio_using_subcommand run" -l diagnostic -d 'Show diagnostic information for bug reports'
 complete -c envio -n "__fish_envio_using_subcommand run" -s h -l help -d 'Print help'
 complete -c envio -n "__fish_envio_using_subcommand import" -s n -l profile-name -d 'name for the imported profile' -r
+complete -c envio -n "__fish_envio_using_subcommand import" -s s -l scope -d 'scope to use (local, global)' -r -f -a "local\t''
+global\t''"
 complete -c envio -n "__fish_envio_using_subcommand import" -l diagnostic -d 'Show diagnostic information for bug reports'
 complete -c envio -n "__fish_envio_using_subcommand import" -s h -l help -d 'Print help'
 complete -c envio -n "__fish_envio_using_subcommand export" -s o -l output-file-path -d 'output file path (default: .env)' -r
 complete -c envio -n "__fish_envio_using_subcommand export" -s k -l keys -d 'comma-separated list of keys to export (type \'select\' to choose interactively)' -r
+complete -c envio -n "__fish_envio_using_subcommand export" -s s -l scope -d 'scope to use (local, global)' -r -f -a "local\t''
+global\t''"
 complete -c envio -n "__fish_envio_using_subcommand export" -l diagnostic -d 'Show diagnostic information for bug reports'
 complete -c envio -n "__fish_envio_using_subcommand export" -s h -l help -d 'Print help'
 complete -c envio -n "__fish_envio_using_subcommand tui" -l diagnostic -d 'Show diagnostic information for bug reports'

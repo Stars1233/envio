@@ -1,21 +1,6 @@
-use std::{fs, path::PathBuf};
+use std::path::PathBuf;
 
-use clap::CommandFactory;
-use clap_complete::{Shell, generate_to};
-
-include!("../src/bin/envio/clap_app.rs");
-
-pub fn gen_man_and_comp() -> Result<(), Box<dyn std::error::Error>> {
-    let mut cmd = ClapApp::command();
-    let app_name = cmd.get_name().to_string();
-
-    let completions_dir = "completions";
-    fs::create_dir_all(completions_dir)?;
-
-    for shell in &[Shell::Bash, Shell::Zsh, Shell::Fish, Shell::PowerShell] {
-        generate_to(*shell, &mut cmd, &app_name, completions_dir)?;
-    }
-
+pub fn export_completion_paths() -> Result<(), Box<dyn std::error::Error>> {
     let completions_base = PathBuf::from("../../../completions");
     println!(
         "cargo:rustc-env=ENVIO_GENERATED_COMPLETION_BASH={}",
@@ -33,13 +18,6 @@ pub fn gen_man_and_comp() -> Result<(), Box<dyn std::error::Error>> {
         "cargo:rustc-env=ENVIO_GENERATED_COMPLETION_PS1={}",
         completions_base.join("_envio.ps1").display()
     );
-
-    let manpage_dir = "man";
-    fs::create_dir_all(manpage_dir)?;
-    let man = clap_mangen::Man::new(cmd);
-    let mut buffer: Vec<u8> = Default::default();
-    man.render(&mut buffer)?;
-    std::fs::write(format!("{}/envio.1", manpage_dir), buffer)?;
 
     Ok(())
 }

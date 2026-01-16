@@ -1,6 +1,7 @@
 mod clap_app;
 mod commands;
 mod completions;
+mod config;
 mod diagnostic;
 mod error;
 mod log_macros;
@@ -25,9 +26,12 @@ pub fn initialize_config() -> AppResult<()> {
     use std::io::Write;
     use std::path::PathBuf;
 
-    use crate::utils::{get_configdir, get_shell_config_path};
+    use crate::{
+        config::{ConfigScope, config_dir_for},
+        utils::get_shell_config_path,
+    };
 
-    let configdir = get_configdir();
+    let configdir = config_dir_for(ConfigScope::Global);
     if !configdir.exists() {
         println!("{}", "Creating config directory".bold());
         fs::create_dir(&configdir)?;

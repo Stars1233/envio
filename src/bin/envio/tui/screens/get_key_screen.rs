@@ -11,7 +11,7 @@ use std::thread::{self, JoinHandle};
 use zeroize::Zeroizing;
 
 use super::{Action, Screen, ScreenEvent, ScreenId};
-use crate::{error::AppResult, utils::get_profile_path};
+use crate::{config::get_profile_path, error::AppResult};
 
 enum Feedback {
     Decrypting,
@@ -162,7 +162,7 @@ impl GetKeyScreen {
         let key = self.key.clone();
 
         self.decrypt_handle = Some(thread::spawn(move || {
-            let profile_path = match get_profile_path(&profile_name) {
+            let profile_path = match get_profile_path(&profile_name, None) {
                 Ok(p) => p,
                 Err(_) => {
                     return None;
