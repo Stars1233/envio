@@ -13,17 +13,15 @@ use base64::{Engine, engine::general_purpose::STANDARD};
 use serde::{Deserialize, Serialize};
 use zeroize::Zeroize;
 
-use crate::{
-    error::{Error, Result},
-    metadata_struct,
-};
+use crate::error::{Error, Result};
 
 pub const CHUNK_SIZE: usize = 1024;
 
-metadata_struct!(V1, {
-    salt: String,
-    nonce: String,
-});
+#[derive(Serialize, Deserialize, Clone, Default, Debug)]
+pub struct MetadataV1 {
+    pub salt: String,
+    pub nonce: String,
+}
 
 pub fn encrypt(key: &str, data: &[u8]) -> Result<(Vec<u8>, MetadataV1)> {
     let salt = SaltString::generate(&mut OsRng);

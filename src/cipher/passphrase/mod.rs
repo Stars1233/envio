@@ -13,12 +13,6 @@ use crate::{
 
 use metadata::VersionedMetadata;
 
-include!(concat!(
-    env!("OUT_DIR"),
-    "/passphrase_decrypt_match_generated.rs"
-));
-include!(concat!(env!("OUT_DIR"), "/passphrase_encrypt_generated.rs"));
-
 #[derive(Clone)]
 pub struct PASSPHRASE {
     key: Zeroizing<String>,
@@ -45,14 +39,19 @@ impl Cipher for PASSPHRASE {
 
     fn encrypt(&mut self, envs: &EnvMap) -> Result<EncryptedContent> {
         let data = envs.as_bytes()?;
-        let (encrypted, metadata) = encrypt_latest(&self.key, &data)?;
-        self.metadata = metadata;
+
+        let (encrypted, metadata) = v1::encrypt(&self.key, &data)?;
+        self.metadata = metadata.into();
 
         Ok(EncryptedContent::Bytes(encrypted))
     }
 
     fn decrypt(&self, encrypted_data: &EncryptedContent) -> Result<EnvMap> {
-        Ok(decrypt_match!(self, &encrypted_data.as_bytes()?)?.into())
+        let raw_data = encrypted_data.as_bytes()?;
+        let decrypted = match &self.metadata {
+            VersionedMetadata::V1(metadata) => v1::decrypt(&self.key, metadata, &raw_data)?,
+        };
+        Ok(decrypted.into())
     }
 
     fn export_metadata(&self) -> Option<serde_json::Value> {

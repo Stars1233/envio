@@ -1,20 +1,21 @@
+use super::v1::MetadataV1;
 use serde::{Deserialize, Serialize};
 
-#[macro_export]
-macro_rules! metadata_struct {
-    ($version:ident, { $($field:ident : $ty:ty),* $(,)? }) => {
-        paste::paste! {
-            #[derive(Serialize, Deserialize, Clone, Default, Debug)]
-            pub struct [<Metadata $version>] {
-                $(
-                    pub $field: $ty,
-                )*
-            }
-        }
-    };
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(tag = "version")]
+pub enum VersionedMetadata {
+    #[serde(rename = "1")]
+    V1(MetadataV1),
 }
 
-include!(concat!(
-    env!("OUT_DIR"),
-    "/passphrase_metadata_generated.rs"
-));
+impl Default for VersionedMetadata {
+    fn default() -> Self {
+        VersionedMetadata::V1(Default::default())
+    }
+}
+
+impl From<MetadataV1> for VersionedMetadata {
+    fn from(meta: MetadataV1) -> Self {
+        VersionedMetadata::V1(meta)
+    }
+}
