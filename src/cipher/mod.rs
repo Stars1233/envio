@@ -19,14 +19,11 @@ use crate::{env::EnvMap, error::Result, utils};
 
 #[derive(Copy, Clone, PartialEq, Serialize, Deserialize, EnumIter, EnumString, AsRefStr)]
 #[serde(rename_all = "lowercase")]
+#[strum(ascii_case_insensitive, serialize_all = "lowercase")]
 pub enum CipherKind {
-    #[strum(ascii_case_insensitive, to_string = "none")]
     NONE,
-    #[strum(ascii_case_insensitive, to_string = "passphrase")]
     PASSPHRASE,
-    #[strum(ascii_case_insensitive, to_string = "symmetric")]
     SYMMETRIC,
-    #[strum(ascii_case_insensitive, to_string = "gpg")]
     GPG,
 }
 

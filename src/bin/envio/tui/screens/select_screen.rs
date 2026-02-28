@@ -138,7 +138,7 @@ impl SelectScreen {
 
     pub fn load_profiles(&mut self) -> AppResult<()> {
         self.profiles.clear();
-        let profile_dir = get_profile_dir();
+        let profile_dir = get_profile_dir()?;
 
         if !profile_dir.exists() {
             return Ok(());
@@ -157,7 +157,7 @@ impl SelectScreen {
                 _ => continue,
             };
 
-            let metadata = get_profile_metadata(&profile_name, None)?;
+            let metadata = get_profile_metadata(&profile_name)?;
 
             self.profiles.push(ProfileInfo {
                 name: profile_name,
@@ -429,7 +429,7 @@ impl SelectScreen {
         match key.code {
             KeyCode::Char('y') | KeyCode::Char('Y') => {
                 self.delete_confirmation = None;
-                crate::ops::delete_profile(&profile_name, None)?;
+                crate::ops::delete_profile(&profile_name)?;
                 self.load_profiles()?;
                 self.update_filter();
                 if !self.filtered_profiles.is_empty() {

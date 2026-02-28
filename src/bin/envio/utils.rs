@@ -1,5 +1,3 @@
-#[cfg(target_family = "unix")]
-use std::path::Path;
 use std::{fs::File, io::Write, path::PathBuf};
 
 use envio::{Env, EnvMap};
@@ -75,36 +73,4 @@ pub async fn download_file(url: &str, file_name: &str) -> AppResult<()> {
 
 pub fn get_cwd() -> PathBuf {
     std::env::current_dir().expect("Failed to get current dir")
-}
-
-pub fn get_home_dir() -> PathBuf {
-    dirs::home_dir().expect("Failed to get home dir")
-}
-
-#[cfg(target_family = "unix")]
-pub fn get_shell_config_path() -> AppResult<PathBuf> {
-    let shell_env_value = std::env::var("SHELL")
-        .map_err(|_| AppError::Msg("Failed to get SHELL environment variable".into()))?;
-
-    let shell = shell_env_value.rsplit('/').next().unwrap_or("");
-
-    let shell_config_path = if shell.contains("bash") {
-        ".bashrc"
-    } else if shell.contains("zsh") {
-        ".zshrc"
-    } else if shell.contains("fish") {
-        ".config/fish/config.fish"
-    } else {
-        return Err(AppError::UnsupportedShell(shell.to_string()));
-    };
-
-    Ok(dirs::home_dir().unwrap().join(shell_config_path))
-}
-
-#[cfg(target_family = "unix")]
-pub fn shorten_home<P: AsRef<Path>>(path: &P) -> String {
-    path.as_ref()
-        .to_str()
-        .unwrap()
-        .replace(dirs::home_dir().unwrap().to_str().unwrap(), "~")
 }

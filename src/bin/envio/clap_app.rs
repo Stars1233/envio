@@ -1,7 +1,5 @@
 use clap::Parser;
 
-use crate::config::ConfigScope;
-
 #[derive(Parser, Debug)]
 #[clap(disable_help_subcommand = true)]
 pub struct ClapApp {
@@ -65,8 +63,6 @@ pub enum Command {
             help = "add expiration dates to the provided environment variables"
         )]
         expires: bool,
-        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
-        scope: Option<ConfigScope>,
     },
 
     #[command(
@@ -78,8 +74,6 @@ pub enum Command {
     Delete {
         #[arg(required = true, help = "name of the profile")]
         profile_name: String,
-        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
-        scope: Option<ConfigScope>,
     },
 
     #[command(
@@ -91,8 +85,6 @@ pub enum Command {
     List {
         #[arg(long = "no-pretty-print", help = "disable pretty printing")]
         no_pretty_print: bool,
-        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
-        scope: Option<ConfigScope>,
     },
 
     #[command(
@@ -113,8 +105,6 @@ pub enum Command {
         show_expiration: bool,
         #[arg(long = "no-pretty-print", help = "disable pretty printing")]
         no_pretty_print: bool,
-        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
-        scope: Option<ConfigScope>,
     },
 
     #[command(
@@ -139,8 +129,6 @@ pub enum Command {
             help = "add expiration dates to the provided environment variables"
         )]
         expires: bool,
-        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
-        scope: Option<ConfigScope>,
     },
 
     #[command(
@@ -153,41 +141,16 @@ pub enum Command {
         profile_name: String,
         #[arg(required = true, value_delimiter = ' ', num_args = 1.., help = "keys of environment variables to remove")]
         keys: Vec<String>,
-        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
-        scope: Option<ConfigScope>,
     },
 
     #[command(
-        name = "load",
-        about = "Load environment variables from a profile for use in terminal sessions",
-        override_usage = "envio load <PROFILE_NAME> [OPTIONS]"
+        name = "shell",
+        about = "Spawn a new shell with environment variables loaded from the profile",
+        override_usage = "envio shell <PROFILE_NAME> [OPTIONS]"
     )]
-    Load {
+    Shell {
         #[arg(required = true, help = "name of the profile")]
         profile_name: String,
-        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
-        scope: Option<ConfigScope>,
-    },
-
-    #[cfg(target_family = "unix")]
-    #[command(
-        name = "unload",
-        about = "Unload previously loaded environment variables from terminal sessions",
-        override_usage = "envio unload"
-    )]
-    Unload,
-
-    #[cfg(target_family = "windows")]
-    #[command(
-        name = "unload",
-        about = "Unload previously loaded environment variables from terminal sessions",
-        override_usage = "envio unload <PROFILE_NAME> [OPTIONS]"
-    )]
-    Unload {
-        #[arg(required = true, help = "name of the profile")]
-        profile_name: String,
-        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
-        scope: Option<ConfigScope>,
     },
 
     #[command(
@@ -198,8 +161,6 @@ pub enum Command {
     Run {
         #[arg(required = true, help = "name of the profile")]
         profile_name: String,
-        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
-        scope: Option<ConfigScope>,
         #[arg(last = true, required = true, help = "command to run")]
         command: Vec<String>,
     },
@@ -218,8 +179,6 @@ pub enum Command {
             help = "name for the imported profile"
         )]
         profile_name: Option<String>,
-        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
-        scope: Option<ConfigScope>,
     },
 
     #[command(
@@ -244,8 +203,6 @@ pub enum Command {
             help = "comma-separated list of keys to export (type 'select' to choose interactively)"
         )]
         keys: Option<Vec<String>>,
-        #[arg(long = "scope", short = 's', help = "scope to use (local, global)")]
-        scope: Option<ConfigScope>,
     },
 
     #[command(

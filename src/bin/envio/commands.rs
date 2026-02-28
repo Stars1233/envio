@@ -51,7 +51,7 @@ impl ClapApp {
         }
 
         match &self.command {
-            Command::Init {} => {
+            Command::Init => {
                 let envio_dir = utils::get_cwd().join(".envio");
                 if envio_dir.exists() {
                     return Err(AppError::Msg(
@@ -72,7 +72,6 @@ impl ClapApp {
                 cipher_kind,
                 comments: add_comments,
                 expires: add_expires,
-                scope,
             } => {
                 let selected_cipher_kind = if let Some(kind) = cipher_kind {
                     kind.parse::<CipherKind>()
@@ -246,7 +245,6 @@ impl ClapApp {
                     description.clone(),
                     envs_map,
                     cipher,
-                    *scope,
                 )?;
 
                 success_msg!("Profile created");
@@ -257,12 +255,9 @@ impl ClapApp {
                 envs,
                 comments: add_comments,
                 expires: add_expires,
-                scope,
             } => {
-                let mut profile = get_profile(
-                    config::get_profile_path(profile_name, *scope)?,
-                    Some(get_userkey),
-                )?;
+                let mut profile =
+                    get_profile(config::get_profile_path(profile_name)?, Some(get_userkey))?;
 
                 ops::check_expired_envs(&profile);
 
@@ -331,15 +326,9 @@ impl ClapApp {
                 success_msg!("Changes applied");
             }
 
-            Command::Unset {
-                profile_name,
-                keys,
-                scope,
-            } => {
-                let mut profile = get_profile(
-                    config::get_profile_path(profile_name, *scope)?,
-                    Some(get_userkey),
-                )?;
+            Command::Unset { profile_name, keys } => {
+                let mut profile =
+                    get_profile(config::get_profile_path(profile_name)?, Some(get_userkey))?;
 
                 ops::check_expired_envs(&profile);
 
@@ -351,64 +340,49 @@ impl ClapApp {
                 success_msg!("Changes applied");
             }
 
-            Command::Load {
-                profile_name,
-                scope,
-            } => {
-                #[cfg(target_family = "unix")]
-                {
-                    ops::load_profile(&config::get_profile_path(profile_name, *scope)?)?;
+            Command::Shell { profile_name } => {
+                let profile =
+                    get_profile(config::get_profile_path(profile_name)?, Some(get_userkey))?;
 
-                    let shell_config = utils::get_shell_config_path()?;
-
-                    if shell_config.exists() {
-                        success_msg!(
-                            "Reload your shell to apply changes or run `source {}`",
-                            utils::shorten_home(&shell_config)
-                        );
-                    } else {
-                        success_msg!("Reload your shell to apply changes");
-                    }
-                }
+                ops::check_expired_envs(&profile);
 
                 #[cfg(target_family = "windows")]
-                {
-                    let profile = get_profile(
-                        config::get_profile_path(profile_name, *scope)?,
-                        Some(get_userkey),
-                    )?;
+                let shell = { std::env::var("COMSPEC").unwrap_or_else(|_| "cmd.exe".to_string()) };
 
-                    ops::load_profile(profile)?;
+                #[cfg(target_family = "unix")]
+                let shell = { std::env::var("SHELL").unwrap_or_else(|_| "/bin/bash".to_string()) };
 
-                    success_msg!("Restart your shell to apply changes");
+                let mut cmd = std::process::Command::new(shell);
+                cmd.envs::<IndexMap<String, String>, _, _>(profile.envs.into());
+
+                success_msg!(
+                    "Starting a new shell session for profile `{}`",
+                    profile_name
+                );
+
+                let mut child = cmd
+                    .stdin(std::process::Stdio::inherit())
+                    .stdout(std::process::Stdio::inherit())
+                    .stderr(std::process::Stdio::inherit())
+                    .spawn()
+                    .map_err(|e| AppError::Msg(format!("Failed to spawn shell: {}", e)))?;
+
+                let status = child
+                    .wait()
+                    .map_err(|e| AppError::Msg(format!("Failed to wait on shell: {}", e)))?;
+
+                success_msg!("Exited shell session for profile `{}`", profile_name);
+
+                if !status.success() {
+                    return Err(AppError::Msg(format!(
+                        "Shell exited with error code: {}",
+                        status.code().unwrap_or(1)
+                    )));
                 }
-            }
-
-            #[cfg(target_family = "unix")]
-            Command::Unload => {
-                ops::unload_profile()?;
-
-                success_msg!("Restart your shell to apply changes");
-            }
-
-            #[cfg(target_family = "windows")]
-            Command::Unload {
-                profile_name,
-                scope,
-            } => {
-                let profile = get_profile(
-                    config::get_profile_path(profile_name, *scope)?,
-                    Some(get_userkey),
-                )?;
-
-                ops::unload_profile(profile)?;
-
-                success_msg!("Restart your shell to apply changes");
             }
 
             Command::Run {
                 profile_name,
-                scope,
                 command,
             } => {
                 if command.is_empty() {
@@ -418,10 +392,8 @@ impl ClapApp {
                 let program = &command[0];
                 let args = &command[1..];
 
-                let profile = get_profile(
-                    config::get_profile_path(profile_name, *scope)?,
-                    Some(get_userkey),
-                )?;
+                let profile =
+                    get_profile(config::get_profile_path(profile_name)?, Some(get_userkey))?;
                 ops::check_expired_envs(&profile);
 
                 let mut cmd = std::process::Command::new(program)
@@ -449,19 +421,13 @@ impl ClapApp {
                 }
             }
 
-            Command::Delete {
-                profile_name,
-                scope,
-            } => {
-                ops::delete_profile(profile_name, *scope)?;
+            Command::Delete { profile_name } => {
+                ops::delete_profile(profile_name)?;
                 success_msg!("Deleted profile");
             }
 
-            Command::List {
-                no_pretty_print,
-                scope,
-            } => {
-                ops::list_profiles(*no_pretty_print, *scope)?;
+            Command::List { no_pretty_print } => {
+                ops::list_profiles(*no_pretty_print)?;
             }
 
             Command::Show {
@@ -469,12 +435,9 @@ impl ClapApp {
                 no_pretty_print,
                 show_comments,
                 show_expiration,
-                scope,
             } => {
-                let profile = get_profile(
-                    config::get_profile_path(profile_name, *scope)?,
-                    Some(get_userkey),
-                )?;
+                let profile =
+                    get_profile(config::get_profile_path(profile_name)?, Some(get_userkey))?;
                 ops::check_expired_envs(&profile);
 
                 if *no_pretty_print {
@@ -490,12 +453,9 @@ impl ClapApp {
                 profile_name,
                 output_file_path,
                 keys,
-                scope,
             } => {
-                let profile = get_profile(
-                    config::get_profile_path(profile_name, *scope)?,
-                    Some(get_userkey),
-                )?;
+                let profile =
+                    get_profile(config::get_profile_path(profile_name)?, Some(get_userkey))?;
 
                 ops::check_expired_envs(&profile);
 
@@ -528,7 +488,6 @@ impl ClapApp {
             Command::Import {
                 source,
                 profile_name,
-                scope,
             } => {
                 let profile_name = profile_name.clone().unwrap_or_else(|| {
                     Path::new(source)
@@ -539,9 +498,9 @@ impl ClapApp {
                 });
 
                 if Url::parse(source).is_ok() {
-                    ops::download_profile(source.to_string(), &profile_name, *scope)?;
+                    ops::download_profile(source.to_string(), &profile_name)?;
                 } else if Path::new(source).exists() {
-                    ops::import_profile(source.to_string(), &profile_name, *scope)?;
+                    ops::import_profile(source.to_string(), &profile_name)?;
                 } else {
                     return Err(AppError::Msg(
                         "Source must be a valid file path or URL".to_string(),
@@ -550,7 +509,7 @@ impl ClapApp {
 
                 success_msg!("Imported profile");
 
-                let location = config::build_profile_path(&profile_name, *scope);
+                let location = config::build_profile_path(&profile_name)?;
 
                 let mut serialized_profile: SerializedProfile =
                     envio::utils::get_serialized_profile(&location)?;

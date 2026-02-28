@@ -4,10 +4,7 @@ use chacha20poly1305::{
     aead::{AeadCore, KeyInit, OsRng},
 };
 
-use argon2::{
-    Argon2,
-    password_hash::{SaltString},
-};
+use argon2::{Argon2, password_hash::SaltString};
 use base64::{Engine, engine::general_purpose::STANDARD};
 
 use serde::{Deserialize, Serialize};

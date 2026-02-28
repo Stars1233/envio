@@ -162,7 +162,7 @@ impl GetKeyScreen {
         let key = self.key.clone();
 
         self.decrypt_handle = Some(thread::spawn(move || {
-            let profile_path = match get_profile_path(&profile_name, None) {
+            let profile_path = match get_profile_path(&profile_name) {
                 Ok(p) => p,
                 Err(_) => {
                     return None;

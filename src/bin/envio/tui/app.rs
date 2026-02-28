@@ -129,7 +129,7 @@ impl TuiApp {
     }
 
     fn open_profile(&mut self, name: &str) -> AppResult<()> {
-        let metadata = get_profile_metadata(name, None)?;
+        let metadata = get_profile_metadata(name)?;
 
         match metadata.cipher_kind {
             envio::cipher::CipherKind::PASSPHRASE | envio::cipher::CipherKind::SYMMETRIC => {
@@ -147,7 +147,7 @@ impl TuiApp {
     }
 
     fn open_unencrypted_profile(&mut self, name: &str) -> AppResult<()> {
-        let path = get_profile_path(name, None)?;
+        let path = get_profile_path(name)?;
         let profile = envio::get_profile(path, None::<fn() -> Zeroizing<String>>)?;
 
         self.ctx.cache.insert_profile(name.to_string(), profile);

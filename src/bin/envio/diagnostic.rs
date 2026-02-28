@@ -1,6 +1,6 @@
 pub use git_version::git_version;
 
-use crate::config::{get_config_dir, get_profile_dir};
+use crate::config::get_profile_dir;
 use crate::error::AppResult;
 
 struct Code {
@@ -66,7 +66,7 @@ impl<'a> DiagnosticReport<'a> {
 
         sections.push(DiagnosticSection {
             title: "Configuration",
-            entry: DiagnosticEntry::List(get_config_info()),
+            entry: DiagnosticEntry::List(get_config_info()?),
         });
 
         sections.push(DiagnosticSection {
@@ -154,60 +154,21 @@ fn format_entry(entry: &DiagnosticEntry) -> String {
     }
 }
 
-fn get_config_info() -> Vec<DiagnosticEntry> {
+fn get_config_info() -> AppResult<Vec<DiagnosticEntry>> {
     let mut info = vec![];
 
-    let configdir = get_config_dir();
+    let profile_dir = get_profile_dir()?;
+
+    let entries = std::fs::read_dir(&profile_dir)?;
+
+    let profile_count = entries.count();
     info.push(DiagnosticEntry::Text(format!(
-        "Config directory: {} ({})",
-        configdir.display(),
-        if configdir.exists() {
-            "exists"
-        } else {
-            "does not exist"
-        }
+        "Profile directory: {} ({} profiles)",
+        profile_dir.display(),
+        profile_count
     )));
 
-    let profile_dir = get_profile_dir();
-    if profile_dir.exists() {
-        match std::fs::read_dir(&profile_dir) {
-            Ok(entries) => {
-                let profile_count = entries.count();
-                info.push(DiagnosticEntry::Text(format!(
-                    "Profile directory: {} ({} profiles)",
-                    profile_dir.display(),
-                    profile_count
-                )));
-            }
-            Err(_) => {
-                info.push(DiagnosticEntry::Text(format!(
-                    "Profile directory: {} (cannot read)",
-                    profile_dir.display()
-                )));
-            }
-        }
-    } else {
-        info.push(DiagnosticEntry::Text(format!(
-            "Profile directory: {} (does not exist)",
-            profile_dir.display()
-        )));
-    }
-
-    #[cfg(target_family = "unix")]
-    {
-        let shellscript_path = configdir.join("setenv.sh");
-        info.push(DiagnosticEntry::Text(format!(
-            "Shell script: {} ({})",
-            shellscript_path.display(),
-            if shellscript_path.exists() {
-                "exists"
-            } else {
-                "does not exist"
-            }
-        )));
-    }
-
-    info
+    Ok(info)
 }
 
 #[cfg(target_family = "unix")]
