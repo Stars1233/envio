@@ -61,10 +61,7 @@ impl Profile {
         }
     }
 
-    pub fn from_file(
-        file_path: impl Into<PathBuf>,
-        mut cipher: Box<dyn Cipher>,
-    ) -> Result<Self> {
+    pub fn from_file(file_path: impl Into<PathBuf>, mut cipher: Box<dyn Cipher>) -> Result<Self> {
         let file_path = file_path.into();
         let serialized_profile = get_serialized_profile(&file_path)?;
 

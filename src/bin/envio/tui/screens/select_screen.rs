@@ -148,7 +148,7 @@ impl SelectScreen {
             let entry = entry?;
             let path = entry.path();
 
-            if path.extension().and_then(|s| s.to_str()) != Some("env") {
+            if path.extension().and_then(|s| s.to_str()) != Some("envio") {
                 continue;
             }
 

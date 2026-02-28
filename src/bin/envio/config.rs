@@ -23,7 +23,7 @@ pub fn contains_path_separator(s: &str) -> bool {
 
 /// returns the path for a profile that does **not** exist yet
 pub fn build_profile_path(profile_name: &str) -> AppResult<PathBuf> {
-    Ok(get_profile_dir()?.join(format!("{profile_name}.env")))
+    Ok(get_profile_dir()?.join(format!("{profile_name}.envio")))
 }
 
 /// returns the path for a profile that **must exist**
