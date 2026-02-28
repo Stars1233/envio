@@ -7,10 +7,7 @@ pub enum Error {
     Io(#[from] std::io::Error),
 
     #[error(transparent)]
-    BincodeEncode(#[from] bincode::error::EncodeError),
-
-    #[error(transparent)]
-    BincodeDecode(#[from] bincode::error::DecodeError),
+    Postcard(#[from] postcard::Error),
 
     #[error(transparent)]
     Json(#[from] serde_json::Error),

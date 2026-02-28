@@ -1,8 +1,4 @@
-use std::{
-    fs::{File, create_dir_all},
-    io::{BufReader, BufWriter, Write},
-    path::PathBuf,
-};
+use std::{fs::create_dir_all, path::PathBuf};
 
 use chrono::{Duration, Utc};
 use dirs::cache_dir;
@@ -30,22 +26,13 @@ fn get_cache_file() -> AppResult<PathBuf> {
 }
 
 fn load_cache() -> AppResult<CacheData> {
-    let file = File::open(get_cache_file()?)?;
-    let mut reader = BufReader::new(file);
-
-    Ok(bincode::serde::decode_from_std_read(
-        &mut reader,
-        bincode::config::standard(),
-    )?)
+    let buf = std::fs::read(get_cache_file()?)?;
+    Ok(postcard::from_bytes(&buf)?)
 }
 
 fn save_cache(data: &CacheData) -> AppResult<()> {
-    let file = File::create(get_cache_file()?)?;
-
-    let mut writer = BufWriter::new(file);
-    bincode::serde::encode_into_std_write(data, &mut writer, bincode::config::standard())?;
-
-    writer.flush()?;
+    let bytes = postcard::to_allocvec(data)?;
+    std::fs::write(get_cache_file()?, bytes)?;
 
     Ok(())
 }

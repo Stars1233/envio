@@ -28,10 +28,7 @@ pub enum AppError {
     VersionParse(#[from] semver::Error),
 
     #[error(transparent)]
-    BincodeEncode(#[from] bincode::error::EncodeError),
-
-    #[error(transparent)]
-    BincodeDecode(#[from] bincode::error::DecodeError),
+    Postcard(#[from] postcard::Error),
 
     #[error(transparent)]
     Reqwest(#[from] reqwest::Error),

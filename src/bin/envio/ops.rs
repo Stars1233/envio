@@ -144,7 +144,7 @@ pub fn list_profiles(no_pretty_print: bool) -> AppResult<()> {
             match path.extension() {
                 None => continue,
                 Some(ext) => {
-                    if ext != "env" {
+                    if ext != "envio" {
                         continue;
                     }
                 }

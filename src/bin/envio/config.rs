@@ -11,7 +11,7 @@ pub fn get_profile_dir() -> AppResult<PathBuf> {
     let envio_dir = get_cwd().join(".envio");
     if !envio_dir.exists() {
         return Err(AppError::Msg(
-            "Current directory has no .envio folder, run `envio init` first.".to_string(),
+            "Current directory has no .envio folder, run `envio init` first".to_string(),
         ));
     }
     Ok(envio_dir.join("profiles"))

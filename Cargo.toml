@@ -41,7 +41,6 @@ doctest = false
 [dependencies]
 argon2 = "0.5.3"
 base64 = "0.22.1"
-bincode = { version = "2.0.1", features = ["serde"] }
 chacha20poly1305 = { version = "0.10.1", features = ["stream"] }
 chrono = { version = "0.4.42", features = ["serde"] }
 clap = { version = "4.5.53", features = ["derive"], optional = true }
@@ -71,6 +70,7 @@ tokio = { version = "1.28.0", optional = true }
 typetag = { version = "0.2", optional = true }
 url = { version = "2.3.1", optional = true }
 zeroize = { version = "1.8.2", features = ["zeroize_derive"] }
+postcard = { version = "1.1.3", features = ["alloc"] }
 
 [target.'cfg(unix)'.dependencies]
 gpgme = "0.11.0"

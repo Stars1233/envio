@@ -59,10 +59,7 @@ impl<'de> Deserialize<'de> for EnvMap {
 
 impl EnvMap {
     pub fn as_bytes(&self) -> Result<Vec<u8>> {
-        Ok(bincode::serde::encode_to_vec(
-            self,
-            bincode::config::standard(),
-        )?)
+        Ok(postcard::to_allocvec(self)?)
     }
 
     pub fn insert(&mut self, env: Env) {
@@ -144,10 +141,7 @@ impl From<Vec<Env>> for EnvMap {
 
 impl From<&[u8]> for EnvMap {
     fn from(bytes: &[u8]) -> Self {
-        let (envs, _): (EnvMap, usize) =
-            bincode::serde::decode_from_slice(bytes, bincode::config::standard())
-                .expect("Failed to deserialize bytes to EnvMap");
-        envs
+        postcard::from_bytes(bytes).expect("Failed to deserialize bytes to EnvMap")
     }
 }
 
