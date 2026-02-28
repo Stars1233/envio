@@ -44,8 +44,6 @@ _arguments "${_arguments_options[@]}" : \
 '*--envs=[environment variables to add (format\: KEY=VALUE or only provide KEY and the value will be prompted for)]:ENVS:_default' \
 '-k+[encryption cipher to use]:CIPHER_KIND:_default' \
 '--cipher-kind=[encryption cipher to use]:CIPHER_KIND:_default' \
-'-s+[scope to use (local, global)]:SCOPE:(local global)' \
-'--scope=[scope to use (local, global)]:SCOPE:(local global)' \
 '-c[add comments to the provided environment variables]' \
 '--comments[add comments to the provided environment variables]' \
 '-x[add expiration dates to the provided environment variables]' \
@@ -66,8 +64,6 @@ _arguments "${_arguments_options[@]}" : \
 '*--envs=[environment variables to add (format\: KEY=VALUE or only provide KEY and the value will be prompted for)]:ENVS:_default' \
 '-k+[encryption cipher to use]:CIPHER_KIND:_default' \
 '--cipher-kind=[encryption cipher to use]:CIPHER_KIND:_default' \
-'-s+[scope to use (local, global)]:SCOPE:(local global)' \
-'--scope=[scope to use (local, global)]:SCOPE:(local global)' \
 '-c[add comments to the provided environment variables]' \
 '--comments[add comments to the provided environment variables]' \
 '-x[add expiration dates to the provided environment variables]' \
@@ -80,8 +76,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (delete)
 _arguments "${_arguments_options[@]}" : \
-'-s+[scope to use (local, global)]:SCOPE:(local global)' \
-'--scope=[scope to use (local, global)]:SCOPE:(local global)' \
 '--diagnostic[Show diagnostic information for bug reports]' \
 '-h[Print help]' \
 '--help[Print help]' \
@@ -90,8 +84,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (remove)
 _arguments "${_arguments_options[@]}" : \
-'-s+[scope to use (local, global)]:SCOPE:(local global)' \
-'--scope=[scope to use (local, global)]:SCOPE:(local global)' \
 '--diagnostic[Show diagnostic information for bug reports]' \
 '-h[Print help]' \
 '--help[Print help]' \
@@ -100,8 +92,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (list)
 _arguments "${_arguments_options[@]}" : \
-'-s+[scope to use (local, global)]:SCOPE:(local global)' \
-'--scope=[scope to use (local, global)]:SCOPE:(local global)' \
 '--no-pretty-print[disable pretty printing]' \
 '--diagnostic[Show diagnostic information for bug reports]' \
 '-h[Print help]' \
@@ -110,8 +100,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (ls)
 _arguments "${_arguments_options[@]}" : \
-'-s+[scope to use (local, global)]:SCOPE:(local global)' \
-'--scope=[scope to use (local, global)]:SCOPE:(local global)' \
 '--no-pretty-print[disable pretty printing]' \
 '--diagnostic[Show diagnostic information for bug reports]' \
 '-h[Print help]' \
@@ -120,8 +108,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (show)
 _arguments "${_arguments_options[@]}" : \
-'-s+[scope to use (local, global)]:SCOPE:(local global)' \
-'--scope=[scope to use (local, global)]:SCOPE:(local global)' \
 '-c[display comments]' \
 '--show-comments[display comments]' \
 '-x[display expiration dates]' \
@@ -135,8 +121,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (set)
 _arguments "${_arguments_options[@]}" : \
-'-s+[scope to use (local, global)]:SCOPE:(local global)' \
-'--scope=[scope to use (local, global)]:SCOPE:(local global)' \
 '-c[add comments to the provided environment variables]' \
 '--comments[add comments to the provided environment variables]' \
 '-x[add expiration dates to the provided environment variables]' \
@@ -150,8 +134,6 @@ _arguments "${_arguments_options[@]}" : \
 ;;
 (unset)
 _arguments "${_arguments_options[@]}" : \
-'-s+[scope to use (local, global)]:SCOPE:(local global)' \
-'--scope=[scope to use (local, global)]:SCOPE:(local global)' \
 '--diagnostic[Show diagnostic information for bug reports]' \
 '-h[Print help]' \
 '--help[Print help]' \
@@ -159,27 +141,16 @@ _arguments "${_arguments_options[@]}" : \
 '*::keys -- keys of environment variables to remove:_default' \
 && ret=0
 ;;
-(load)
+(shell)
 _arguments "${_arguments_options[@]}" : \
-'-s+[scope to use (local, global)]:SCOPE:(local global)' \
-'--scope=[scope to use (local, global)]:SCOPE:(local global)' \
 '--diagnostic[Show diagnostic information for bug reports]' \
 '-h[Print help]' \
 '--help[Print help]' \
 ':profile_name -- name of the profile:_default' \
 && ret=0
 ;;
-(unload)
-_arguments "${_arguments_options[@]}" : \
-'--diagnostic[Show diagnostic information for bug reports]' \
-'-h[Print help]' \
-'--help[Print help]' \
-&& ret=0
-;;
 (run)
 _arguments "${_arguments_options[@]}" : \
-'-s+[scope to use (local, global)]:SCOPE:(local global)' \
-'--scope=[scope to use (local, global)]:SCOPE:(local global)' \
 '--diagnostic[Show diagnostic information for bug reports]' \
 '-h[Print help]' \
 '--help[Print help]' \
@@ -191,8 +162,6 @@ _arguments "${_arguments_options[@]}" : \
 _arguments "${_arguments_options[@]}" : \
 '-n+[name for the imported profile]:PROFILE_NAME:_default' \
 '--profile-name=[name for the imported profile]:PROFILE_NAME:_default' \
-'-s+[scope to use (local, global)]:SCOPE:(local global)' \
-'--scope=[scope to use (local, global)]:SCOPE:(local global)' \
 '--diagnostic[Show diagnostic information for bug reports]' \
 '-h[Print help]' \
 '--help[Print help]' \
@@ -205,8 +174,6 @@ _arguments "${_arguments_options[@]}" : \
 '--output-file-path=[output file path (default\: .env)]:OUTPUT_FILE_PATH:_default' \
 '*-k+[comma-separated list of keys to export (type '\''select'\'' to choose interactively)]:KEYS:_default' \
 '*--keys=[comma-separated list of keys to export (type '\''select'\'' to choose interactively)]:KEYS:_default' \
-'-s+[scope to use (local, global)]:SCOPE:(local global)' \
-'--scope=[scope to use (local, global)]:SCOPE:(local global)' \
 '--diagnostic[Show diagnostic information for bug reports]' \
 '-h[Print help]' \
 '--help[Print help]' \
@@ -255,8 +222,7 @@ _envio_commands() {
 'show:Show environment variables in a profile' \
 'set:Set or update environment variables in a profile' \
 'unset:Remove environment variables from a profile' \
-'load:Load environment variables from a profile for use in terminal sessions' \
-'unload:Unload previously loaded environment variables from terminal sessions' \
+'shell:Spawn a new shell with environment variables loaded from the profile' \
 'run:Run a command using environment variables from a profile' \
 'import:Import a profile from a file or url' \
 'export:Export the environment variables of a profile to a file' \
@@ -301,11 +267,6 @@ _envio__list_commands() {
     local commands; commands=()
     _describe -t commands 'envio list commands' commands "$@"
 }
-(( $+functions[_envio__load_commands] )) ||
-_envio__load_commands() {
-    local commands; commands=()
-    _describe -t commands 'envio load commands' commands "$@"
-}
 (( $+functions[_envio__run_commands] )) ||
 _envio__run_commands() {
     local commands; commands=()
@@ -316,6 +277,11 @@ _envio__set_commands() {
     local commands; commands=()
     _describe -t commands 'envio set commands' commands "$@"
 }
+(( $+functions[_envio__shell_commands] )) ||
+_envio__shell_commands() {
+    local commands; commands=()
+    _describe -t commands 'envio shell commands' commands "$@"
+}
 (( $+functions[_envio__show_commands] )) ||
 _envio__show_commands() {
     local commands; commands=()
@@ -325,11 +291,6 @@ _envio__show_commands() {
 _envio__tui_commands() {
     local commands; commands=()
     _describe -t commands 'envio tui commands' commands "$@"
-}
-(( $+functions[_envio__unload_commands] )) ||
-_envio__unload_commands() {
-    local commands; commands=()
-    _describe -t commands 'envio unload commands' commands "$@"
 }
 (( $+functions[_envio__unset_commands] )) ||
 _envio__unset_commands() {
