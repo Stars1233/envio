@@ -946,7 +946,6 @@ impl EditProfileScreen {
 
         serialized_profile.metadata.name = new_profile_name;
         serialized_profile.metadata.description = new_profile_description;
-        serialized_profile.metadata.file_path = new_file_path.clone();
 
         envio::utils::save_serialized_profile(&old_file_path, serialized_profile)?;
 

@@ -1,4 +1,4 @@
-use std::path::{Path, PathBuf};
+use std::path::PathBuf;
 
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
@@ -16,7 +16,6 @@ pub struct ProfileMetadata {
     pub version: String,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub description: Option<String>,
-    pub file_path: PathBuf,
     pub cipher_kind: CipherKind,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub cipher_metadata: Option<serde_json::Value>,
@@ -27,6 +26,7 @@ pub struct ProfileMetadata {
 #[derive(Clone)]
 pub struct Profile {
     pub metadata: ProfileMetadata,
+    pub file_path: PathBuf,
     pub envs: EnvMap,
     pub cipher: Box<dyn Cipher>,
 }
@@ -41,35 +41,40 @@ impl Profile {
     pub fn new(
         name: String,
         description: Option<String>,
-        file_path: PathBuf,
+        file_path: impl Into<PathBuf>,
         envs: EnvMap,
         cipher: Box<dyn Cipher>,
-    ) -> Profile {
-        Profile {
+    ) -> Self {
+        Self {
             metadata: ProfileMetadata {
                 name,
                 version: env!("CARGO_PKG_VERSION").to_string(),
                 description,
-                file_path,
                 cipher_kind: cipher.kind(),
                 cipher_metadata: cipher.export_metadata(),
                 created_at: Local::now(),
                 updated_at: Local::now(),
             },
+            file_path: file_path.into(),
             envs,
             cipher,
         }
     }
 
-    pub fn from_file<P: AsRef<Path>>(file_path: P, mut cipher: Box<dyn Cipher>) -> Result<Profile> {
+    pub fn from_file(
+        file_path: impl Into<PathBuf>,
+        mut cipher: Box<dyn Cipher>,
+    ) -> Result<Self> {
+        let file_path = file_path.into();
         let serialized_profile = get_serialized_profile(&file_path)?;
 
         if let Some(cipher_metadata) = &serialized_profile.metadata.cipher_metadata {
             cipher.import_metadata(cipher_metadata.clone())?;
         }
 
-        Ok(Profile {
+        Ok(Self {
             metadata: serialized_profile.metadata,
+            file_path,
             envs: cipher.decrypt(&serialized_profile.content)?,
             cipher,
         })
@@ -86,7 +91,7 @@ impl Profile {
             content: encrypted_envs,
         };
 
-        save_serialized_profile(&self.metadata.file_path, serialized_profile)?;
+        save_serialized_profile(&self.file_path, serialized_profile)?;
 
         Ok(())
     }

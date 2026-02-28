@@ -20,6 +20,7 @@ where
     P: AsRef<Path>,
     F: FnOnce() -> Zeroizing<String>,
 {
+    let file_path = file_path.as_ref().to_path_buf();
     let mut cipher = get_profile_cipher(&file_path)?;
 
     if matches!(
@@ -53,6 +54,7 @@ where
     P: AsRef<Path>,
     F: FnOnce() -> Zeroizing<String>,
 {
+    let file_path = file_path.as_ref().to_path_buf();
     let profile = get_profile(file_path, key_provider)?;
 
     for env in &profile.envs {

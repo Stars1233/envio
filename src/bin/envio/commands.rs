@@ -515,7 +515,6 @@ impl ClapApp {
                     envio::utils::get_serialized_profile(&location)?;
 
                 serialized_profile.metadata.name = profile_name;
-                serialized_profile.metadata.file_path = location.clone();
 
                 envio::utils::save_serialized_profile(&location, serialized_profile)?;
             }
