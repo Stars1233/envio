@@ -10,14 +10,22 @@ You can choose from the following encryption methods for your profiles:
 
 - **No Encryption (`none`)**: Stores the profile in plain text. Not recommended for sensitive data, but useful for non-sensitive configuration or testing.
 - **Passphrase Encryption (`passphrase`)**: Encrypts the profile using a password you provide. You'll need to enter this password each time you access the profile.
-- **Age Encryption (`age`)** _(BETA)_: Uses the [age](https://crates.io/crates/age) encryption library. Similar to passphrase encryption but uses the age encryption format.
-- **GPG Encryption (`gpg`)**: Uses your GPG keys to encrypt the profile. A good option if you already use GPG, and you don't need to remember a separate password. (Unix only)
+- **Symmetric Encryption (`symmetric`)**: Encrypts the profile using a generated symmetric key. You'll need to keep this key safe to access the profile.
+- **GPG Encryption (`gpg`)**: Uses your GPG keys to encrypt the profile. A good option if you already use GPG, and you don't need to remember a separate password. 
 
 **Note**: Once you choose an encryption method for a profile, it cannot be changed
 
 ---
 
 ## Commands
+
+### Project Initialization
+
+Initialize `envio` to be used in the current project directory:
+
+```bash
+envio init
+```
 
 ### Creating Profiles
 
@@ -38,7 +46,10 @@ envio new <PROFILE_NAME>
 This will prompt you to:
 
 - Choose an encryption method
-- Enter your encryption key if using passphrase/age, or select a GPG key if using GPG
+- Enter your encryption key if using passphrase/symmetric, or select a GPG key if using GPG
+
+> [!WARNING]
+> If the symmetric encryption method is chosen, the key will be printed to the console after the profile is created You'll need to save this key somewhere safe to access the profile later
 
 #### Create with Environment Variables
 
@@ -100,7 +111,7 @@ Instead of being prompted, you can choose your encryption method upfront using t
 
 ```bash
 envio create <PROFILE_NAME> -k passphrase
-envio create <PROFILE_NAME> -k age
+envio create <PROFILE_NAME> -k symmetric
 envio create <PROFILE_NAME> -k gpg
 envio create <PROFILE_NAME> -k none
 ```
@@ -227,16 +238,13 @@ envio unset <PROFILE_NAME> API_KEY DATABASE_URL
 
 ### Using Profiles
 
-#### Loading into Terminal
+#### Starting a Profile Shell
 
-Load a profile into your current terminal session:
+Spawn a new shell session with the profile's environment variables loaded:
 
 ```bash
-envio load <PROFILE_NAME>
+envio shell <PROFILE_NAME>
 ```
-
-- On Unix systems, you'll need to reload your shell to apply changes
-- On Windows, you'll need to restart your shell to apply changes
 
 #### Running Commands with a Profile
 
@@ -248,22 +256,6 @@ envio run <PROFILE_NAME> -- python app.py
 ```
 
 The `--` separates the profile name from the command. Everything after `--` is executed with the profile's environment variables.
-
-#### Unloading Profiles
-
-On Unix systems, unload the currently loaded profile:
-
-```bash
-envio unload
-```
-
-On Windows, you need to specify which profile to unload:
-
-```bash
-envio unload <PROFILE_NAME>
-```
-
-Restart your shell to apply changes.
 
 ### Importing and Exporting
 
@@ -404,7 +396,7 @@ envio --help
 
 Set this environment variable to provide your encryption key without being prompted. This is useful for automation, scripts, and CI/CD pipelines
 
-- passphrase/age encryption: your encryption key
+- passphrase/symmetric encryption: your encryption key
 - GPG encryption: your GPG key fingerprint
 
 For example:
