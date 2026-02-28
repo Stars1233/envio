@@ -16,7 +16,7 @@ See how to [build the project from source here](./docs/build_from_source.md)
 
 1. Create a new branch: `git checkout -b my-branch-name`
 2. Make your change
-3. Run `make format` or `pnpm run format` to format the source code
+3. Run `cargo fmt` to format the source code
 4. Submit a pull request
 
 Ensure commit messages are descriptive and follow the [conventional commit message format](https://www.conventionalcommits.org/en/v1.0.0/)
