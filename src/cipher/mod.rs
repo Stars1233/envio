@@ -1,14 +1,12 @@
-pub mod age;
 pub mod gpg;
 pub mod none;
 pub mod passphrase;
+pub mod symmetric;
 
-// re-export the cipher types
-pub use age::AGE;
-use colored::Colorize;
 pub use gpg::GPG;
 pub use none::NONE;
 pub use passphrase::PASSPHRASE;
+pub use symmetric::SYMMETRIC;
 
 use dyn_clone::DynClone;
 use serde::{Deserialize, Serialize};
@@ -26,23 +24,15 @@ pub enum CipherKind {
     NONE,
     #[strum(ascii_case_insensitive, to_string = "passphrase")]
     PASSPHRASE,
-    #[strum(ascii_case_insensitive, to_string = "age", props(label = "BETA"))]
-    AGE,
+    #[strum(ascii_case_insensitive, to_string = "symmetric")]
+    SYMMETRIC,
     #[strum(ascii_case_insensitive, to_string = "gpg")]
     GPG,
 }
 
 impl std::fmt::Display for CipherKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            CipherKind::AGE => write!(
-                f,
-                "{} {}",
-                self.as_ref(),
-                "[BETA] https://crates.io/crates/age".bold().yellow()
-            ),
-            _ => write!(f, "{}", self.as_ref()),
-        }
+        write!(f, "{}", self.as_ref())
     }
 }
 
@@ -94,7 +84,7 @@ pub fn create_cipher(
     match cipher_kind {
         CipherKind::NONE => Ok(Box::new(NONE)),
         CipherKind::PASSPHRASE => Ok(Box::new(PASSPHRASE::new(key.unwrap_or_default()))),
-        CipherKind::AGE => Ok(Box::new(AGE::new(key.unwrap_or_default()))),
+        CipherKind::SYMMETRIC => Ok(Box::new(SYMMETRIC::new(key.unwrap_or_default()))),
         CipherKind::GPG => Ok(Box::new(GPG::new(key.unwrap_or_default().to_string()))),
     }
 }

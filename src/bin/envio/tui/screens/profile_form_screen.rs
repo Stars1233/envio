@@ -25,7 +25,8 @@ enum Status {
     Idle,
     Saving,
     Saved,
-    Error(String, Color),
+    Info(String),
+    Error(String),
 }
 
 fn draw_text_field(
@@ -66,30 +67,26 @@ fn draw_text_field(
 }
 
 fn draw_header(frame: &mut Frame, area: Rect, title: &str, status: &Status, status_message: &str) {
-    let border_color = match status {
-        Status::Saving => Color::Yellow,
-        Status::Saved => Color::Green,
-        Status::Error(_, color) => *color,
-        Status::Idle => Color::Blue,
+    let (status_color, status_str) = match status {
+        Status::Saving => (Color::Yellow, "Saving...".to_string()),
+        Status::Saved => (Color::Green, "Saved".to_string()),
+        Status::Error(e) => (Color::Red, format!("Error: {}", e)),
+        Status::Idle => (Color::Blue, status_message.to_string()),
+        Status::Info(e) => (Color::Green, format!("Info: {}", e)),
     };
 
     let block = Block::default()
         .borders(Borders::ALL)
         .title(title)
-        .border_style(Style::default().fg(border_color));
+        .border_style(Style::default().fg(status_color));
 
-    let status_text = match status {
-        Status::Saving => Span::styled("Saving...", Style::default().fg(Color::Yellow)),
-        Status::Saved => Span::styled("Saved", Style::default().fg(Color::Green)),
-        Status::Error(e, color) => {
-            Span::styled(format!("Error: {}", e), Style::default().fg(*color))
-        }
-        Status::Idle => Span::styled(status_message, Style::default().fg(Color::DarkGray)),
-    };
+    let paragraph = Paragraph::new(Line::from(Span::styled(
+        status_str,
+        Style::default().fg(status_color),
+    )))
+    .block(block);
 
-    let text = vec![Line::from(status_text)];
-
-    frame.render_widget(Paragraph::new(text).block(block), area);
+    frame.render_widget(paragraph, area);
 }
 
 fn draw_footer(frame: &mut Frame, area: Rect, text: &str) {
@@ -493,28 +490,25 @@ impl CreateProfileScreen {
 
     fn save(&mut self) -> AppResult<()> {
         if self.name.trim().is_empty() {
-            self.status = Status::Error("Name cannot be empty".to_string(), Color::Red);
+            self.status = Status::Error("Name cannot be empty".to_string());
             return Ok(());
         }
 
         if self.name.trim().contains(' ') {
-            self.status =
-                Status::Error("Profile name cannot contain spaces".to_string(), Color::Red);
+            self.status = Status::Error("Profile name cannot contain spaces".to_string());
             return Ok(());
         }
 
         let key = match self.get_selected_cipher_kind() {
-            CipherKind::PASSPHRASE | CipherKind::AGE => {
+            CipherKind::PASSPHRASE => {
                 if self.passphrase.len() < 8 {
-                    self.status = Status::Error(
-                        "Passphrase must be at least 8 characters".to_string(),
-                        Color::Red,
-                    );
+                    self.status =
+                        Status::Error("Passphrase must be at least 8 characters".to_string());
                     return Ok(());
                 }
 
                 if self.passphrase != self.passphrase_confirm {
-                    self.status = Status::Error("Passphrases do not match".to_string(), Color::Red);
+                    self.status = Status::Error("Passphrases do not match".to_string());
                     return Ok(());
                 }
 
@@ -525,9 +519,15 @@ impl CreateProfileScreen {
                 if let Some(ref key) = self.get_selected_gpg_key() {
                     Some(key.clone().into())
                 } else {
-                    self.status = Status::Error("Please select a GPG key".to_string(), Color::Red);
+                    self.status = Status::Error("Please select a GPG key".to_string());
                     return Ok(());
                 }
+            }
+
+            CipherKind::SYMMETRIC => {
+                let generated_key = envio::cipher::SYMMETRIC::generate_key();
+                self.status = Status::Info(format!("Generated Key: {}", generated_key.as_str()));
+                Some(generated_key)
             }
 
             CipherKind::NONE => None,
@@ -557,10 +557,8 @@ impl CreateProfileScreen {
         if let Some(handle) = self.save_handle.take() {
             match handle.join() {
                 Ok(Ok(())) => self.status = Status::Saved,
-                Ok(Err(e)) => self.status = Status::Error(e.to_string(), Color::Red),
-                Err(_) => {
-                    self.status = Status::Error("Save thread panicked".to_string(), Color::Red)
-                }
+                Ok(Err(e)) => self.status = Status::Error(e.to_string()),
+                Err(_) => self.status = Status::Error("Save thread panicked".to_string()),
             }
         }
     }
@@ -596,7 +594,7 @@ impl CreateProfileScreen {
 
                 let cipher_color = match kind {
                     CipherKind::PASSPHRASE => Color::Yellow,
-                    CipherKind::AGE => Color::Magenta,
+                    CipherKind::SYMMETRIC => Color::Magenta,
                     CipherKind::GPG => Color::Green,
                     CipherKind::NONE => Color::Blue,
                 };
@@ -926,13 +924,12 @@ impl EditProfileScreen {
 
     fn save(&mut self) -> AppResult<()> {
         if self.name.trim().is_empty() {
-            self.status = Status::Error("Name cannot be empty".to_string(), Color::Red);
+            self.status = Status::Error("Name cannot be empty".to_string());
             return Ok(());
         }
 
         if self.name.trim().contains(' ') {
-            self.status =
-                Status::Error("Profile name cannot contain spaces".to_string(), Color::Red);
+            self.status = Status::Error("Profile name cannot contain spaces".to_string());
             return Ok(());
         }
 

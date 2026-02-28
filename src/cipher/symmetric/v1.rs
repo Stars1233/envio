@@ -1,17 +1,10 @@
+use base64::{Engine, engine::general_purpose::STANDARD};
 use chacha20poly1305::{
     Key, XChaCha20Poly1305,
     aead::stream::{DecryptorBE32, EncryptorBE32},
     aead::{AeadCore, KeyInit, OsRng},
 };
-
-use argon2::{
-    Argon2,
-    password_hash::{SaltString},
-};
-use base64::{Engine, engine::general_purpose::STANDARD};
-
 use serde::{Deserialize, Serialize};
-use zeroize::Zeroize;
 
 use crate::error::{Error, Result};
 
@@ -19,29 +12,25 @@ pub const CHUNK_SIZE: usize = 1024;
 
 #[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct MetadataV1 {
-    pub salt: String,
     pub nonce: String,
 }
 
 pub fn encrypt(key: &str, data: &[u8]) -> Result<(Vec<u8>, MetadataV1)> {
-    let salt = SaltString::generate(&mut OsRng);
-    let mut output_key_material = [0u8; 32];
-
-    Argon2::default()
-        .hash_password_into(
-            key.as_bytes(),
-            salt.as_str().as_bytes(),
-            &mut output_key_material,
-        )
+    let key_bytes = STANDARD
+        .decode(key)
         .map_err(|e| Error::Cipher(e.to_string()))?;
+
+    if key_bytes.len() != 32 {
+        return Err(Error::Cipher(
+            "Symmetric key must be exactly 32 bytes (base64 encoded)".to_string(),
+        ));
+    }
 
     let nonce_bytes = &XChaCha20Poly1305::generate_nonce(&mut OsRng)[0..19];
     let mut encryptor = EncryptorBE32::<XChaCha20Poly1305>::from_aead(
-        XChaCha20Poly1305::new(Key::from_slice(&output_key_material)),
+        XChaCha20Poly1305::new(Key::from_slice(&key_bytes)),
         nonce_bytes.into(),
     );
-
-    output_key_material.zeroize();
 
     let mut encrypted_buffer = Vec::new();
     let mut offset = 0;
@@ -67,7 +56,6 @@ pub fn encrypt(key: &str, data: &[u8]) -> Result<(Vec<u8>, MetadataV1)> {
     );
 
     let metadata = MetadataV1 {
-        salt: salt.to_string(),
         nonce: STANDARD.encode(nonce_bytes),
     };
 
@@ -75,22 +63,21 @@ pub fn encrypt(key: &str, data: &[u8]) -> Result<(Vec<u8>, MetadataV1)> {
 }
 
 pub fn decrypt(key: &str, metadata: &MetadataV1, encrypted_data: &[u8]) -> Result<Vec<u8>> {
-    let mut output_key_material = [0u8; 32];
-
-    Argon2::default()
-        .hash_password_into(
-            key.as_bytes(),
-            metadata.salt.as_bytes(),
-            &mut output_key_material,
-        )
+    let key_bytes = STANDARD
+        .decode(key)
         .map_err(|e| Error::Cipher(e.to_string()))?;
+
+    if key_bytes.len() != 32 {
+        return Err(Error::Cipher(
+            "Symmetric key must be exactly 32 bytes (base64 encoded)".to_string(),
+        ));
+    }
 
     let nonce_bytes = STANDARD
         .decode(&metadata.nonce)
         .map_err(|e| Error::Cipher(e.to_string()))?;
 
-    let cipher = XChaCha20Poly1305::new(Key::from_slice(&output_key_material));
-    output_key_material.zeroize();
+    let cipher = XChaCha20Poly1305::new(Key::from_slice(&key_bytes));
 
     let mut decryptor =
         DecryptorBE32::<XChaCha20Poly1305>::from_aead(cipher, nonce_bytes.as_slice().into());

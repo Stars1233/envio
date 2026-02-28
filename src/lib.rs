@@ -11,7 +11,7 @@ pub use env::{Env, EnvMap};
 pub use profile::{Profile, ProfileMetadata};
 
 use crate::{
-    cipher::{AGE, CipherKind, PASSPHRASE, get_profile_cipher},
+    cipher::{CipherKind, PASSPHRASE, SYMMETRIC, get_profile_cipher},
     error::{Error, Result},
 };
 
@@ -22,11 +22,12 @@ where
 {
     let mut cipher = get_profile_cipher(&file_path)?;
 
-    if matches!(cipher.kind(), CipherKind::PASSPHRASE | CipherKind::AGE) {
+    if matches!(
+        cipher.kind(),
+        CipherKind::PASSPHRASE | CipherKind::SYMMETRIC
+    ) {
         let key = key_provider.ok_or_else(|| {
-            Error::Msg(
-                "Key provider is required for profiles using passphrase or AGE encryption".into(),
-            )
+            Error::Msg("Key provider is required for profiles using encryption".into())
         })?;
 
         match cipher.kind() {
@@ -35,10 +36,10 @@ where
                 .downcast_mut::<PASSPHRASE>()
                 .expect("Failed to cast to PASSPHRASE")
                 .set_key(key()),
-            CipherKind::AGE => cipher
+            CipherKind::SYMMETRIC => cipher
                 .as_any_mut()
-                .downcast_mut::<AGE>()
-                .expect("Failed to cast to AGE")
+                .downcast_mut::<SYMMETRIC>()
+                .expect("Failed to cast to SYMMETRIC")
                 .set_key(key()),
             _ => {}
         }

@@ -129,22 +129,31 @@ impl ClapApp {
                         }
                     }
 
-                    CipherKind::PASSPHRASE | CipherKind::AGE => {
-                        Some(if let Ok(key) = std::env::var("ENVIO_KEY") {
-                            Zeroizing::new(key)
-                        } else {
-                            prompts::password_prompt(prompts::PasswordPromptOptions {
-                                title: "Enter your encryption key:".to_string(),
-                                help_message: Some(
-                                    "Remember this key, you will need it to decrypt your profile later"
-                                        .to_string(),
-                                ),
-                                min_length: Some(8),
-                                with_confirmation: true,
-                                confirmation_error_message: Some("The keys don't match".to_string()),
-                            })?
-                            .into()
-                        })
+                    CipherKind::PASSPHRASE => Some(if let Ok(key) = std::env::var("ENVIO_KEY") {
+                        Zeroizing::new(key)
+                    } else {
+                        prompts::password_prompt(prompts::PasswordPromptOptions {
+                            title: "Enter your encryption key:".to_string(),
+                            help_message: Some(
+                                "Remember this key, you will need it to decrypt your profile later"
+                                    .to_string(),
+                            ),
+                            min_length: Some(8),
+                            with_confirmation: true,
+                            confirmation_error_message: Some("The keys don't match".to_string()),
+                        })?
+                        .into()
+                    }),
+
+                    CipherKind::SYMMETRIC => {
+                        let generated = envio::cipher::SYMMETRIC::generate_key();
+                        println!(
+                            "{} {}",
+                            "Generated Symmetric Key:".bold().green(),
+                            generated.as_str().bold().white()
+                        );
+                        println!("{}", "Please store this key safely. It will not be shown again, and you need it to decrypt your profile!".bold().red());
+                        Some(generated)
                     }
 
                     _ => None,
