@@ -32,7 +32,7 @@ pub enum ScreenId {
     CreateProfile,
     EditProfile(String),
     GetKey(String),
-    Edit(Profile),
+    Edit(Box<Profile>),
 }
 
 impl PartialEq for ScreenId {
@@ -55,7 +55,7 @@ impl ScreenId {
             ScreenId::CreateProfile => Ok(Box::new(CreateProfileScreen::new()?)),
             ScreenId::EditProfile(name) => Ok(Box::new(EditProfileScreen::new(name.clone())?)),
             ScreenId::GetKey(name) => Ok(Box::new(GetKeyScreen::new(name.clone()))),
-            ScreenId::Edit(profile) => Ok(Box::new(EditEnvsScreen::new(profile.clone())?)),
+            ScreenId::Edit(profile) => Ok(Box::new(EditEnvsScreen::new(*profile.clone())?)),
         }
     }
 }

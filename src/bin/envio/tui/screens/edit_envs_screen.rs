@@ -142,7 +142,7 @@ impl Screen for EditEnvsScreen {
     }
 
     fn id(&self) -> ScreenId {
-        ScreenId::Edit(self.profile.clone())
+        ScreenId::Edit(Box::new(self.profile.clone()))
     }
 }
 

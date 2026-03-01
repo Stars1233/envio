@@ -87,7 +87,7 @@ impl TuiApp {
     fn handle_screen_event(&mut self, event: ScreenEvent) -> AppResult<()> {
         match event {
             ScreenEvent::ProfileDecrypted(profile) => {
-                self.navigation.push(ScreenId::Edit(profile))?;
+                self.navigation.push(ScreenId::Edit(Box::new(profile)))?;
             }
         }
         Ok(())
@@ -123,16 +123,17 @@ impl TuiApp {
         match metadata.cipher_kind {
             envio::cipher::CipherKind::PASSPHRASE | envio::cipher::CipherKind::SYMMETRIC => {
                 if let Ok(entry) = keyring::Entry::new("envio", metadata.uuid.as_str())
-                    && let Ok(pwd) = entry.get_password() {
-                        let path = get_profile_path(name)?;
-                        if let Ok(profile) = envio::get_profile(
-                            path,
-                            Some(|_: &envio::ProfileMetadata| zeroize::Zeroizing::new(pwd)),
-                        ) {
-                            self.navigation.push(ScreenId::Edit(profile))?;
-                            return Ok(());
-                        }
+                    && let Ok(pwd) = entry.get_password()
+                {
+                    let path = get_profile_path(name)?;
+                    if let Ok(profile) = envio::get_profile(
+                        path,
+                        Some(|_: &envio::ProfileMetadata| zeroize::Zeroizing::new(pwd)),
+                    ) {
+                        self.navigation.push(ScreenId::Edit(Box::new(profile)))?;
+                        return Ok(());
                     }
+                }
 
                 self.navigation
                     .push_overlay(ScreenId::GetKey(name.to_string()))?;
@@ -150,7 +151,7 @@ impl TuiApp {
             None::<fn(&envio::ProfileMetadata) -> Zeroizing<String>>,
         )?;
 
-        self.navigation.push(ScreenId::Edit(profile))?;
+        self.navigation.push(ScreenId::Edit(Box::new(profile)))?;
 
         Ok(())
     }
