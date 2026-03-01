@@ -26,10 +26,8 @@
 Some key features of `envio` include:
 
 - **Encrypt** profiles using different encryption methods
-- **Load** profiles into your terminal sessions
+- **Start** new shell sessions with profile environment variables injected
 - **Run** programs with your profiles
-- **Import** profiles stored on the internet
-- **Export** profiles to a plain text file
 
 ## Installation
 
