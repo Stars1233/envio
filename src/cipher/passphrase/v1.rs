@@ -4,7 +4,7 @@ use chacha20poly1305::{
     aead::{AeadCore, KeyInit, OsRng},
 };
 
-use argon2::{Argon2, password_hash::SaltString};
+use argon2::{Algorithm, Argon2, Params, Version, password_hash::SaltString};
 use base64::{Engine, engine::general_purpose::STANDARD};
 
 use serde::{Deserialize, Serialize};
@@ -13,6 +13,12 @@ use zeroize::Zeroize;
 use crate::error::{Error, Result};
 
 pub const CHUNK_SIZE: usize = 1024;
+
+// https://www.rfc-editor.org/rfc/rfc9106#name-parameter-choice (2)
+pub const ARGON2_MEMORY: u32 = 2u32.pow(16);
+pub const ARGON2_ITERATIONS: u32 = 3;
+pub const ARGON2_PARALLELISM: u32 = 4;
+pub const ARGON2_KEY_SIZE: usize = 32;
 
 #[derive(Serialize, Deserialize, Clone, Default, Debug)]
 pub struct MetadataV1 {
@@ -24,13 +30,23 @@ pub fn encrypt(key: &str, data: &[u8]) -> Result<(Vec<u8>, MetadataV1)> {
     let salt = SaltString::generate(&mut OsRng);
     let mut output_key_material = [0u8; 32];
 
-    Argon2::default()
-        .hash_password_into(
-            key.as_bytes(),
-            salt.as_str().as_bytes(),
-            &mut output_key_material,
+    Argon2::new(
+        Algorithm::Argon2id,
+        Version::V0x13,
+        Params::new(
+            ARGON2_MEMORY,
+            ARGON2_ITERATIONS,
+            ARGON2_PARALLELISM,
+            Some(ARGON2_KEY_SIZE),
         )
-        .map_err(|e| Error::Cipher(e.to_string()))?;
+        .map_err(|e| Error::Cipher(e.to_string()))?,
+    )
+    .hash_password_into(
+        key.as_bytes(),
+        salt.as_str().as_bytes(),
+        &mut output_key_material,
+    )
+    .map_err(|e| Error::Cipher(e.to_string()))?;
 
     let nonce_bytes = &XChaCha20Poly1305::generate_nonce(&mut OsRng)[0..19];
     let mut encryptor = EncryptorBE32::<XChaCha20Poly1305>::from_aead(
@@ -74,13 +90,23 @@ pub fn encrypt(key: &str, data: &[u8]) -> Result<(Vec<u8>, MetadataV1)> {
 pub fn decrypt(key: &str, metadata: &MetadataV1, encrypted_data: &[u8]) -> Result<Vec<u8>> {
     let mut output_key_material = [0u8; 32];
 
-    Argon2::default()
-        .hash_password_into(
-            key.as_bytes(),
-            metadata.salt.as_bytes(),
-            &mut output_key_material,
+    Argon2::new(
+        Algorithm::Argon2id,
+        Version::V0x13,
+        Params::new(
+            ARGON2_MEMORY,
+            ARGON2_ITERATIONS,
+            ARGON2_PARALLELISM,
+            Some(ARGON2_KEY_SIZE),
         )
-        .map_err(|e| Error::Cipher(e.to_string()))?;
+        .map_err(|e| Error::Cipher(e.to_string()))?,
+    )
+    .hash_password_into(
+        key.as_bytes(),
+        metadata.salt.as_bytes(),
+        &mut output_key_material,
+    )
+    .map_err(|e| Error::Cipher(e.to_string()))?;
 
     let nonce_bytes = STANDARD
         .decode(&metadata.nonce)
