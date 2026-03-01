@@ -5,7 +5,6 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     libgpgme-dev \
     libgpg-error-dev \
-    libssl-dev \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
@@ -21,7 +20,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     bash \
     libgpgme-dev \
     libgpg-error-dev \
-    libssl-dev \
     ca-certificates \
     sudo \
     && rm -rf /var/lib/apt/lists/*
