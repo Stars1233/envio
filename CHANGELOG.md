@@ -1,4 +1,32 @@
 # Change Log
+
+# v0.7.0
+
+> [!WARNING]
+> This is a breaking release
+
+## Features
+- **CLI UX redesign** — the entire CLI experience has been redesigned
+- **Terminal User Interface (TUI)** — brand-new interactive TUI for managing profiles
+- **Profile metadata format** — the structure of profile metadata has been completely redesigned; existing profiles need to be recreated
+- **Encryption key management** — manually add and remove encryption keys from the OS keyring (`add-key` / `remove-key`)
+- **`ENVIO_KEY` environment variable** — non-interactive key input for passphrase and GPG cipher kinds
+- **Zeroize** — sensitive key material is now zeroized after use
+- **`none` cipher type** — a new cipher type that creates unencrypted profiles
+- **`symmetric` cipher type** — a new cipher type that uses a symmetric key to encrypt and decrypt profiles
+- **`completion` command** — display shell completions directly from the CLI
+- **Diagnostic flag** (`--diagnostic`) — for troubleshooting
+- **Postcard serialization** — profiles are serialized with `postcard` instead of `bincode`
+- **`.envio` file extension** — profile files now use `.envio` instead of `.env`
+- **`shell` command** — replaces `load`/`unload`; starts a new shell session with profile environment variables injected
+
+## Other
+- Minimum Rust version bumped to 1.93.0
+- Updated to Rust 2024 edition
+- Dockerfile support added
+
+And much more.
+
 # v0.6.1
 ## Features
 * Users can now pass in the `-v` (or `--update-values`) argument to optionally update the values of their envs in the `update` command
