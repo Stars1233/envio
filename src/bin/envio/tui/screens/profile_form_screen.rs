@@ -124,6 +124,7 @@ pub struct CreateProfileScreen {
     key_sub_field: KeySubField,
     status: Status,
     save_handle: Option<JoinHandle<AppResult<()>>>,
+    generated_key: Option<Zeroizing<String>>,
 }
 
 impl Screen for CreateProfileScreen {
@@ -400,6 +401,7 @@ impl CreateProfileScreen {
             key_sub_field: KeySubField::Passphrase,
             status: Status::Idle,
             save_handle: None,
+            generated_key: None,
         })
     }
 
@@ -527,6 +529,7 @@ impl CreateProfileScreen {
             CipherKind::SYMMETRIC => {
                 let generated_key = envio::cipher::SYMMETRIC::generate_key();
                 self.status = Status::Info(format!("Generated Key: {}", generated_key.as_str()));
+                self.generated_key = Some(generated_key.clone());
                 Some(generated_key)
             }
 
@@ -554,10 +557,21 @@ impl CreateProfileScreen {
 
     fn check_save(&mut self) {
         if let Some(handle) = self.save_handle.take() {
-            match handle.join() {
-                Ok(Ok(())) => self.status = Status::Saved,
-                Ok(Err(e)) => self.status = Status::Error(e.to_string()),
-                Err(_) => self.status = Status::Error("Save thread panicked".to_string()),
+            if handle.is_finished() {
+                match handle.join() {
+                    Ok(Ok(())) => {
+                        if let Some(key) = &self.generated_key {
+                            self.status = Status::Saved;
+                            self.status = Status::Info(format!("Saved! Key: {}", key.as_str()));
+                        } else {
+                            self.status = Status::Saved;
+                        }
+                    }
+                    Ok(Err(e)) => self.status = Status::Error(e.to_string()),
+                    Err(_) => self.status = Status::Error("Save thread panicked".to_string()),
+                }
+            } else {
+                self.save_handle = Some(handle);
             }
         }
     }
