@@ -10,7 +10,6 @@ use std::time::Duration;
 use zeroize::Zeroizing;
 
 use super::{
-    context::AppContext,
     navigation::NavigationStack,
     screens::{Action, Screen, ScreenEvent, ScreenId, SelectScreen},
 };
@@ -20,7 +19,6 @@ use crate::{
 };
 
 pub struct TuiApp {
-    ctx: AppContext,
     navigation: NavigationStack,
     current_screen: Box<dyn Screen>,
     exit: bool,
@@ -29,7 +27,6 @@ pub struct TuiApp {
 impl TuiApp {
     pub fn default() -> AppResult<Self> {
         Ok(Self {
-            ctx: AppContext::new(),
             navigation: NavigationStack::new(ScreenId::Select),
             current_screen: Box::new(SelectScreen::new()?),
             exit: false,
@@ -49,7 +46,6 @@ impl TuiApp {
 
             self.handle_input_events()?;
             self.update_current_screen()?;
-            self.ctx.cache.cleanup_expired();
 
             std::thread::sleep(Duration::from_millis(16));
         }
@@ -83,7 +79,7 @@ impl TuiApp {
         if let Some(id) = self.navigation.current()
             && id != &self.current_screen.id()
         {
-            self.current_screen = id.create_screen(&mut self.ctx)?;
+            self.current_screen = id.create_screen()?;
         }
         Ok(())
     }
@@ -91,14 +87,7 @@ impl TuiApp {
     fn handle_screen_event(&mut self, event: ScreenEvent) -> AppResult<()> {
         match event {
             ScreenEvent::ProfileDecrypted(profile) => {
-                let name = profile.metadata.name.clone();
-                self.ctx.cache.insert_profile(name.clone(), profile);
-                self.navigation.push(ScreenId::Edit(name))?;
-            }
-
-            ScreenEvent::ProfileUpdated(profile) => {
-                let name = profile.metadata.name.clone();
-                self.ctx.cache.insert_profile(name, profile);
+                self.navigation.push(ScreenId::Edit(profile))?;
             }
         }
         Ok(())
@@ -133,12 +122,21 @@ impl TuiApp {
 
         match metadata.cipher_kind {
             envio::cipher::CipherKind::PASSPHRASE | envio::cipher::CipherKind::SYMMETRIC => {
-                if self.ctx.cache.has_profile(name) {
-                    self.navigation.push(ScreenId::Edit(name.to_string()))?;
-                } else {
-                    self.navigation
-                        .push_overlay(ScreenId::GetKey(name.to_string()))?;
+                if let Ok(entry) = keyring::Entry::new("envio", metadata.uuid.as_str()) {
+                    if let Ok(pwd) = entry.get_password() {
+                        let path = get_profile_path(name)?;
+                        if let Ok(profile) = envio::get_profile(
+                            path,
+                            Some(|_: &envio::ProfileMetadata| zeroize::Zeroizing::new(pwd)),
+                        ) {
+                            self.navigation.push(ScreenId::Edit(profile))?;
+                            return Ok(());
+                        }
+                    }
                 }
+
+                self.navigation
+                    .push_overlay(ScreenId::GetKey(name.to_string()))?;
             }
             _ => self.open_unencrypted_profile(name)?,
         }
@@ -153,8 +151,7 @@ impl TuiApp {
             None::<fn(&envio::ProfileMetadata) -> Zeroizing<String>>,
         )?;
 
-        self.ctx.cache.insert_profile(name.to_string(), profile);
-        self.navigation.push(ScreenId::Edit(name.to_string()))?;
+        self.navigation.push(ScreenId::Edit(profile))?;
 
         Ok(())
     }

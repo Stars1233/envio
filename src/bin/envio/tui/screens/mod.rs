@@ -11,7 +11,7 @@ pub use select_screen::SelectScreen;
 use envio::Profile;
 use ratatui::{Frame, crossterm::event::KeyEvent};
 
-use crate::{error::AppResult, tui::context::AppContext};
+use crate::error::AppResult;
 
 pub enum Action {
     None,
@@ -24,26 +24,38 @@ pub enum Action {
 
 pub enum ScreenEvent {
     ProfileDecrypted(Profile),
-    ProfileUpdated(Profile),
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone)]
 pub enum ScreenId {
     Select,
     CreateProfile,
     EditProfile(String),
     GetKey(String),
-    Edit(String),
+    Edit(Profile),
+}
+
+impl PartialEq for ScreenId {
+    fn eq(&self, other: &Self) -> bool {
+        match (self, other) {
+            (ScreenId::Select, ScreenId::Select) => true,
+            (ScreenId::CreateProfile, ScreenId::CreateProfile) => true,
+            (ScreenId::EditProfile(a), ScreenId::EditProfile(b)) => a == b,
+            (ScreenId::GetKey(a), ScreenId::GetKey(b)) => a == b,
+            (ScreenId::Edit(a), ScreenId::Edit(b)) => a.metadata.name == b.metadata.name,
+            _ => false,
+        }
+    }
 }
 
 impl ScreenId {
-    pub fn create_screen(&self, context: &mut AppContext) -> AppResult<Box<dyn Screen>> {
+    pub fn create_screen(&self) -> AppResult<Box<dyn Screen>> {
         match self {
             ScreenId::Select => Ok(Box::new(SelectScreen::new()?)),
             ScreenId::CreateProfile => Ok(Box::new(CreateProfileScreen::new()?)),
             ScreenId::EditProfile(name) => Ok(Box::new(EditProfileScreen::new(name.clone())?)),
             ScreenId::GetKey(name) => Ok(Box::new(GetKeyScreen::new(name.clone()))),
-            ScreenId::Edit(name) => Ok(Box::new(EditEnvsScreen::new(name.clone(), context)?)),
+            ScreenId::Edit(profile) => Ok(Box::new(EditEnvsScreen::new(profile.clone())?)),
         }
     }
 }

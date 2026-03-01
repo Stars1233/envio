@@ -1,5 +1,4 @@
 mod app;
-mod context;
 mod navigation;
 mod screens;
 

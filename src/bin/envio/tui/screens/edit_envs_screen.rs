@@ -10,7 +10,7 @@ use ratatui::{
 use std::thread::{self, JoinHandle};
 
 use super::{Action, Screen, ScreenEvent, ScreenId};
-use crate::{error::AppResult, tui::context::AppContext};
+use crate::error::AppResult;
 
 enum EditMode {
     None,
@@ -33,7 +33,6 @@ pub struct EditEnvsScreen {
     edit_buffer: String,
     status: Status,
     save_handle: Option<JoinHandle<AppResult<()>>>,
-    pending_cache_update: Option<Profile>,
 }
 
 impl Screen for EditEnvsScreen {
@@ -139,25 +138,16 @@ impl Screen for EditEnvsScreen {
 
     fn tick(&mut self) -> AppResult<Option<ScreenEvent>> {
         self.check_save();
-
-        if let Some(profile) = self.pending_cache_update.take() {
-            return Ok(Some(ScreenEvent::ProfileUpdated(profile)));
-        }
-
         Ok(None)
     }
 
     fn id(&self) -> ScreenId {
-        ScreenId::Edit(self.profile.metadata.name.clone())
+        ScreenId::Edit(self.profile.clone())
     }
 }
 
 impl EditEnvsScreen {
-    pub fn new(profile_name: String, ctx: &mut AppContext) -> AppResult<Self> {
-        let profile = ctx.cache.get_profile(&profile_name).ok_or_else(|| {
-            crate::error::AppError::Msg(format!("Profile {} not found in cache", profile_name))
-        })?;
-
+    pub fn new(profile: Profile) -> AppResult<Self> {
         let envs: Vec<Env> = profile.envs.iter().cloned().collect();
         let mut list_state = ListState::default();
         if !envs.is_empty() {
@@ -172,7 +162,6 @@ impl EditEnvsScreen {
             edit_buffer: String::new(),
             status: Status::Idle,
             save_handle: None,
-            pending_cache_update: None,
         })
     }
 
@@ -300,7 +289,6 @@ impl EditEnvsScreen {
         self.profile.envs = self.envs.clone().into();
 
         let mut profile = self.profile.clone();
-        self.pending_cache_update = Some(profile.clone());
 
         self.status = Status::Saving;
         self.save_handle = Some(thread::spawn(move || {
