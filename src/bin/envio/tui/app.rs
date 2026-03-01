@@ -122,8 +122,8 @@ impl TuiApp {
 
         match metadata.cipher_kind {
             envio::cipher::CipherKind::PASSPHRASE | envio::cipher::CipherKind::SYMMETRIC => {
-                if let Ok(entry) = keyring::Entry::new("envio", metadata.uuid.as_str()) {
-                    if let Ok(pwd) = entry.get_password() {
+                if let Ok(entry) = keyring::Entry::new("envio", metadata.uuid.as_str())
+                    && let Ok(pwd) = entry.get_password() {
                         let path = get_profile_path(name)?;
                         if let Ok(profile) = envio::get_profile(
                             path,
@@ -133,7 +133,6 @@ impl TuiApp {
                             return Ok(());
                         }
                     }
-                }
 
                 self.navigation
                     .push_overlay(ScreenId::GetKey(name.to_string()))?;

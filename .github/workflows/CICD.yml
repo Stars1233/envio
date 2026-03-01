@@ -45,7 +45,7 @@ jobs:
       - name: Run cargo fmt
         run: cargo fmt -- --check
       - name: Install libgpgme-dev and libgpg-error-dev
-        run: sudo apt-get -y update && sudo apt-get install -y libgpgme-dev && sudo apt-get install -y libgpg-error-dev
+        run: sudo apt-get update -y && sudo apt-get install -y libgpgme-dev libgpg-error-dev libdbus-1-dev
       - name: Run clippy (on minimum supported rust version to prevent warnings we can't fix)
         run: cargo clippy --locked --all-targets ${{ env.MSRV_FEATURES }}
       - name: Run tests

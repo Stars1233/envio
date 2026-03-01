@@ -1,8 +1,8 @@
 [target.x86_64-unknown-linux-gnu]
-pre-build = ["export DEBIAN_FRONTEND=noninteractive && apt-get update -y && apt-get install -y libgpgme-dev libgpg-error-dev libssl-dev"]
+pre-build = ["export DEBIAN_FRONTEND=noninteractive && apt-get update -y && apt-get install -y libgpgme-dev libgpg-error-dev libssl-dev libdbus-1-dev"]
 
 [target.aarch64-unknown-linux-gnu]
-pre-build = ["dpkg --add-architecture arm64 && export DEBIAN_FRONTEND=noninteractive && apt-get update -y && apt-get install -y libgpgme-dev:arm64 libgpg-error-dev:arm64 libssl-dev:arm64"]
+pre-build = ["dpkg --add-architecture arm64 && export DEBIAN_FRONTEND=noninteractive && apt-get update -y && apt-get install -y libgpgme-dev:arm64 libgpg-error-dev:arm64 libssl-dev:arm64 libdbus-1-dev:arm64"]
 
 [target.i686-unknown-linux-gnu]
-pre-build = ["dpkg --add-architecture i386 && export DEBIAN_FRONTEND=noninteractive && apt-get update -y && apt-get install -y libgpgme-dev:i386 libgpg-error-dev:i386 libssl-dev:i386"]
+pre-build = ["dpkg --add-architecture i386 && export DEBIAN_FRONTEND=noninteractive && apt-get update -y && apt-get install -y libgpgme-dev:i386 libgpg-error-dev:i386 libssl-dev:i386 libdbus-1-dev:i386"]
