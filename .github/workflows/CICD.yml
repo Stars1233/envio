@@ -97,6 +97,7 @@ jobs:
             export ENVIO_VERSION=${TAG_VERSION}
             chmod +x scripts/replace-version.sh
             ./scripts/replace-version.sh
+            cargo update --workspace
           fi
 
       - name: Install prerequisites
