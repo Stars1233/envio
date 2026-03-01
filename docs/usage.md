@@ -11,7 +11,7 @@ You can choose from the following encryption methods for your profiles:
 - **No Encryption (`none`)**: Stores the profile in plain text. Not recommended for sensitive data, but useful for non-sensitive configuration or testing.
 - **Passphrase Encryption (`passphrase`)**: Encrypts the profile using a password you provide. You'll need to enter this password each time you access the profile.
 - **Symmetric Encryption (`symmetric`)**: Encrypts the profile using a generated symmetric key. You'll need to keep this key safe to access the profile.
-- **GPG Encryption (`gpg`)**: Uses your GPG keys to encrypt the profile. A good option if you already use GPG, and you don't need to remember a separate password. 
+- **GPG Encryption (`gpg`)**: Uses your GPG keys to encrypt the profile. A good option if you already use GPG, and you don't need to remember a separate password.
 
 **Note**: Once you choose an encryption method for a profile, it cannot be changed
 
@@ -321,6 +321,26 @@ Or use the `remove` alias:
 
 ```bash
 envio remove <PROFILE_NAME>
+```
+
+### Managing Encryption Keys
+
+You can store your profile encryption keys in your system's secure keyring. This allows you to access your encrypted profiles without entering them every time. 
+
+When you create a new profile, you'll be asked whether you want to save its encryption key to the keyring.
+
+You can also add or remove profile encryption keys from the keyring later using the following commands:
+
+To add a profile encryption key to the keyring:
+
+```bash
+envio add-key <PROFILE_NAME>
+```
+
+To remove a profile encryption key from the keyring:
+
+```bash
+envio remove-key <PROFILE_NAME>
 ```
 
 ### Interactive TUI
