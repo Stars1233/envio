@@ -206,6 +206,26 @@ pub enum Command {
     },
 
     #[command(
+        name = "add-key",
+        about = "Add a profile encryption key to the keyring",
+        override_usage = "envio add-key <PROFILE_NAME>"
+    )]
+    AddKey {
+        #[arg(required = true, help = "name of the profile")]
+        profile_name: String,
+    },
+
+    #[command(
+        name = "remove-key",
+        about = "Remove a profile encryption key from the keyring",
+        override_usage = "envio remove-key <PROFILE_NAME>"
+    )]
+    RemoveKey {
+        #[arg(required = true, help = "name of the profile")]
+        profile_name: String,
+    },
+
+    #[command(
         name = "tui",
         about = "Launch the interactive TUI application",
         override_usage = "envio tui"

@@ -542,6 +542,72 @@ impl ClapApp {
                 envio::utils::save_serialized_profile(&location, serialized_profile)?;
             }
 
+            Command::AddKey { profile_name } => {
+                let location = config::get_profile_path(profile_name)?;
+
+                let serialized_profile: SerializedProfile =
+                    envio::utils::get_serialized_profile(&location)?;
+
+                if !matches!(
+                    serialized_profile.metadata.cipher_kind,
+                    CipherKind::SYMMETRIC | CipherKind::PASSPHRASE
+                ) {
+                    return Err(AppError::Msg(format!(
+                        "The cipher type '{}' does not support storing keys in the keyring",
+                        serialized_profile.metadata.cipher_kind
+                    )));
+                }
+
+                let key = prompts::password_prompt(prompts::PasswordPromptOptions {
+                    title: format!("Enter the encryption key for profile '{}':", profile_name),
+                    help_message: None,
+                    min_length: None,
+                    with_confirmation: false,
+                    confirmation_error_message: None,
+                })?;
+
+                let entry = keyring::Entry::new("envio", &serialized_profile.metadata.uuid)
+                    .map_err(|e| AppError::Msg(format!("Failed to access keyring: {}", e)))?;
+
+                entry
+                    .set_password(&key)
+                    .map_err(|e| AppError::Msg(format!("Failed to store key in keyring: {}", e)))?;
+
+                success_msg!(
+                    "Encryption key for profile '{}' stored in the keyring",
+                    profile_name
+                );
+            }
+
+            Command::RemoveKey { profile_name } => {
+                let location = config::get_profile_path(profile_name)?;
+
+                let serialized_profile: SerializedProfile =
+                    envio::utils::get_serialized_profile(&location)?;
+
+                let entry = keyring::Entry::new("envio", &serialized_profile.metadata.uuid)
+                    .map_err(|e| AppError::Msg(format!("Failed to access keyring: {}", e)))?;
+
+                match entry.delete_credential() {
+                    Ok(_) => success_msg!(
+                        "Encryption key for profile '{}' removed from the keyring",
+                        profile_name
+                    ),
+                    Err(keyring::Error::NoEntry) => {
+                        return Err(AppError::Msg(format!(
+                            "No encryption key found in the keyring for profile '{}'",
+                            profile_name
+                        )));
+                    }
+                    Err(e) => {
+                        return Err(AppError::Msg(format!(
+                            "Failed to remove key from keyring: {}",
+                            e
+                        )));
+                    }
+                }
+            }
+
             Command::Tui => {
                 let mut terminal = ratatui::init();
                 TuiApp::default()?.run(&mut terminal)?;

@@ -180,6 +180,22 @@ _arguments "${_arguments_options[@]}" : \
 ':profile_name -- name of the profile:_default' \
 && ret=0
 ;;
+(add-key)
+_arguments "${_arguments_options[@]}" : \
+'--diagnostic[Show diagnostic information for bug reports]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':profile_name -- name of the profile:_default' \
+&& ret=0
+;;
+(remove-key)
+_arguments "${_arguments_options[@]}" : \
+'--diagnostic[Show diagnostic information for bug reports]' \
+'-h[Print help]' \
+'--help[Print help]' \
+':profile_name -- name of the profile:_default' \
+&& ret=0
+;;
 (tui)
 _arguments "${_arguments_options[@]}" : \
 '--diagnostic[Show diagnostic information for bug reports]' \
@@ -226,11 +242,18 @@ _envio_commands() {
 'run:Run a command using environment variables from a profile' \
 'import:Import a profile from a file or url' \
 'export:Export the environment variables of a profile to a file' \
+'add-key:Add a profile encryption key to the keyring' \
+'remove-key:Remove a profile encryption key from the keyring' \
 'tui:Launch the interactive TUI application' \
 'completion:Show shell completion for the provided shell' \
 'version:Print version information' \
     )
     _describe -t commands 'envio commands' commands "$@"
+}
+(( $+functions[_envio__add-key_commands] )) ||
+_envio__add-key_commands() {
+    local commands; commands=()
+    _describe -t commands 'envio add-key commands' commands "$@"
 }
 (( $+functions[_envio__completion_commands] )) ||
 _envio__completion_commands() {
@@ -266,6 +289,11 @@ _envio__init_commands() {
 _envio__list_commands() {
     local commands; commands=()
     _describe -t commands 'envio list commands' commands "$@"
+}
+(( $+functions[_envio__remove-key_commands] )) ||
+_envio__remove-key_commands() {
+    local commands; commands=()
+    _describe -t commands 'envio remove-key commands' commands "$@"
 }
 (( $+functions[_envio__run_commands] )) ||
 _envio__run_commands() {

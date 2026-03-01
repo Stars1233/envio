@@ -34,8 +34,11 @@ pub fn password_prompt(options: PasswordPromptOptions) -> AppResult<String> {
     let mut prompt = Password::new(&options.title)
         .with_display_mode(PasswordDisplayMode::Masked)
         .with_display_toggle_enabled()
-        .with_help_message(options.help_message.as_deref().unwrap_or(""))
         .with_validator(min_length!(options.min_length.unwrap_or(8)));
+
+    if let Some(help_message) = options.help_message.as_ref() {
+        prompt = prompt.with_help_message(help_message);
+    }
 
     if options.with_confirmation {
         prompt = prompt.with_custom_confirmation_error_message(
