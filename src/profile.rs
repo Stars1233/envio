@@ -2,16 +2,18 @@ use std::path::PathBuf;
 
 use chrono::{DateTime, Local};
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
 use crate::{
     cipher::{Cipher, CipherKind, EncryptedContent},
     env::EnvMap,
     error::Result,
-    utils::{get_serialized_profile, save_serialized_profile},
+    utils::save_serialized_profile,
 };
 
 #[derive(Clone, Serialize, Deserialize)]
 pub struct ProfileMetadata {
+    pub uuid: String,
     pub name: String,
     pub version: String,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -47,6 +49,7 @@ impl Profile {
     ) -> Self {
         Self {
             metadata: ProfileMetadata {
+                uuid: Uuid::new_v4().to_string(),
                 name,
                 version: env!("CARGO_PKG_VERSION").to_string(),
                 description,
@@ -59,22 +62,6 @@ impl Profile {
             envs,
             cipher,
         }
-    }
-
-    pub fn from_file(file_path: impl Into<PathBuf>, mut cipher: Box<dyn Cipher>) -> Result<Self> {
-        let file_path = file_path.into();
-        let serialized_profile = get_serialized_profile(&file_path)?;
-
-        if let Some(cipher_metadata) = &serialized_profile.metadata.cipher_metadata {
-            cipher.import_metadata(cipher_metadata.clone())?;
-        }
-
-        Ok(Self {
-            metadata: serialized_profile.metadata,
-            file_path,
-            envs: cipher.decrypt(&serialized_profile.content)?,
-            cipher,
-        })
     }
 
     pub fn save(&mut self) -> Result<()> {

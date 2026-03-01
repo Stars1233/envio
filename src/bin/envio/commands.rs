@@ -6,7 +6,7 @@ use envio::{
     Env, EnvMap,
     cipher::{CipherKind, create_cipher, gpg::get_gpg_keys},
     get_profile,
-    profile::SerializedProfile,
+    profile::{ProfileMetadata, SerializedProfile},
 };
 use indexmap::IndexMap;
 use strum::IntoEnumIterator;
@@ -23,9 +23,15 @@ use crate::{
     utils,
 };
 
-fn get_userkey() -> Zeroizing<String> {
+fn get_userkey(meta: &ProfileMetadata) -> Zeroizing<String> {
     if let Ok(key) = std::env::var("ENVIO_KEY") {
         return Zeroizing::new(key);
+    }
+
+    if let Ok(entry) = keyring::Entry::new("envio", &meta.uuid)
+        && let Ok(pwd) = entry.get_password()
+    {
+        return Zeroizing::new(pwd);
     }
 
     match prompts::password_prompt(prompts::PasswordPromptOptions {
@@ -158,7 +164,7 @@ impl ClapApp {
                     _ => None,
                 };
 
-                let cipher = create_cipher(selected_cipher_kind, key)?;
+                let cipher = create_cipher(selected_cipher_kind, key.clone())?;
 
                 let mut envs_map;
 
@@ -240,12 +246,29 @@ impl ClapApp {
                     }
                 }
 
-                ops::create_profile(
+                let profile = ops::create_profile(
                     profile_name.to_string(),
                     description.clone(),
                     envs_map,
                     cipher,
                 )?;
+
+                if matches!(
+                    selected_cipher_kind,
+                    CipherKind::SYMMETRIC | CipherKind::PASSPHRASE
+                ) {
+                    let store_in_keyring = prompts::confirm_prompt(prompts::ConfirmPromptOptions {
+                            title: "Do you want to securely store the encryption key in the system keyring?".to_string(),
+                            default: Some(true),
+                        }).unwrap_or(false);
+
+                    if store_in_keyring
+                        && let Ok(entry) = keyring::Entry::new("envio", &profile.metadata.uuid)
+                        && let Err(e) = entry.set_password(&key.unwrap())
+                    {
+                        error_msg!("Failed to store key in keyring: {}", e);
+                    }
+                }
 
                 success_msg!("Profile created");
             }

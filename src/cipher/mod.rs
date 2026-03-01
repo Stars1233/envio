@@ -11,11 +11,11 @@ pub use symmetric::SYMMETRIC;
 use dyn_clone::DynClone;
 use serde::{Deserialize, Serialize};
 use serde_with::{base64::Base64, serde_as};
-use std::{any::Any, path::Path};
+use std::any::Any;
 use strum_macros::{AsRefStr, EnumIter, EnumString};
 use zeroize::Zeroizing;
 
-use crate::{env::EnvMap, error::Result, utils};
+use crate::{env::EnvMap, error::Result};
 
 #[derive(Copy, Clone, PartialEq, Serialize, Deserialize, EnumIter, EnumString, AsRefStr)]
 #[serde(rename_all = "lowercase")]
@@ -84,10 +84,4 @@ pub fn create_cipher(
         CipherKind::SYMMETRIC => Ok(Box::new(SYMMETRIC::new(key.unwrap_or_default()))),
         CipherKind::GPG => Ok(Box::new(GPG::new(key.unwrap_or_default().to_string()))),
     }
-}
-
-pub fn get_profile_cipher<P: AsRef<Path>>(profile_filepath: P) -> Result<Box<dyn Cipher>> {
-    let serialized_profile = utils::get_serialized_profile(profile_filepath)?;
-
-    create_cipher(serialized_profile.metadata.cipher_kind, None)
 }

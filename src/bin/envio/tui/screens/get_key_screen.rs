@@ -169,7 +169,7 @@ impl GetKeyScreen {
                 }
             };
 
-            envio::get_profile(profile_path, Some(|| key)).ok()
+            envio::get_profile(profile_path, Some(|_: &envio::ProfileMetadata| key)).ok()
         }));
 
         Ok(())

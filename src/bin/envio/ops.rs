@@ -23,16 +23,17 @@ pub fn create_profile(
     description: Option<String>,
     envs: EnvMap,
     cipher: Box<dyn Cipher>,
-) -> AppResult<()> {
+) -> AppResult<Profile> {
     let profile_file_path = build_profile_path(&name)?;
 
     if profile_file_path.exists() {
         return Err(AppError::ProfileExists(name));
     }
 
-    Profile::new(name, description, profile_file_path, envs, cipher).save()?;
+    let mut profile = Profile::new(name, description, profile_file_path, envs, cipher);
+    profile.save()?;
 
-    Ok(())
+    Ok(profile)
 }
 
 pub fn check_expired_envs(profile: &Profile) {

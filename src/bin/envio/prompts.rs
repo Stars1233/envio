@@ -1,9 +1,26 @@
 use std::{env, path::Path};
 
-use inquire::{DateSelect, MultiSelect, Password, PasswordDisplayMode, Select, Text, min_length};
+use inquire::{
+    Confirm, DateSelect, MultiSelect, Password, PasswordDisplayMode, Select, Text, min_length,
+};
 use regex::Regex;
 
 use crate::error::AppResult;
+
+pub struct ConfirmPromptOptions {
+    pub title: String,
+    pub default: Option<bool>,
+}
+
+pub fn confirm_prompt(options: ConfirmPromptOptions) -> AppResult<bool> {
+    let mut prompt = Confirm::new(&options.title);
+
+    if let Some(default) = options.default {
+        prompt = prompt.with_default(default);
+    }
+
+    Ok(prompt.prompt()?)
+}
 
 pub struct PasswordPromptOptions {
     pub title: String,
